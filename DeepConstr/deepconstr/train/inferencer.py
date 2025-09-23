@@ -6,6 +6,7 @@ import os
 import openai
 from deepconstr.logger import LLM_LOG
 from deepconstr.utils import formatted_dict
+import json
 
 load_dotenv(override=True)
 
@@ -77,7 +78,7 @@ class Inferencer() :
         client = openai.OpenAI(
             api_key=os.getenv('OPENAI_API_KEY1'),
             base_url=os.getenv('OPENAI_API_URL1'),
-            default_headers=os.getenv('OPENAI_DEFAULT_HEADERS1'),
+            default_headers={"x-foo": "true"},#json.loads(os.getenv('OPENAI_DEFAULT_HEADERS1')),
             timeout=self.setting['timeout']
         )
         try:
