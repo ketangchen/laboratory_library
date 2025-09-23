@@ -1,0 +1,68 @@
+args:
+  dtype:
+  - Tensor
+  - Optional[int]
+  - bool
+  is_pos:
+  - true
+  - false
+  - false
+  name:
+  - self
+  - dim
+  - keepdim
+  required:
+  - true
+  - false
+  - false
+name: torch.Tensor.aminmax
+package: torch
+pass_rate: 99.8
+rules:
+- - cot: 'The error occurs because the given dimension is 3 which is out of the valid
+      range. To prevent this error, we need to ensure that the "dim" value is always
+      within the valid range for the given tensor. If we denote the shape of the tensor
+      as n, the valid range for the dimension would be [-n, n-1].
+
+
+      The constraint for the ''dim'' parameter can be expressed as:'
+    target:
+      choosen_dtype:
+        dim: int
+        keepdim: bool
+        self: tensor
+      msg: Dimension out of range (expected to be in range of [-1, 0], but got 3)
+      package: torch
+    txt: dim >= -1 and dim < 1
+  - f1_score: 91.15770282588879
+    overall_score: 50.578851412944395
+    precision: 100.0
+    recall: 83.75209380234506
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        dim: Optional[int]
+        keepdim: bool
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        dim: Optional[int]
+        keepdim: bool
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

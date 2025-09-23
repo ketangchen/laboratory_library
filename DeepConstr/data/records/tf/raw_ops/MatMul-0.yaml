@@ -1,0 +1,138 @@
+args:
+  dtype:
+  - float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+  - float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+  - str
+  - bool
+  - bool
+  is_pos:
+  - false
+  - false
+  - false
+  - false
+  - false
+  name:
+  - a
+  - b
+  - name
+  - transpose_a
+  - transpose_b
+  required:
+  - true
+  - true
+  - false
+  - false
+  - false
+name: tf.raw_ops.MatMul
+package: tensorflow
+pass_rate: 35.5
+rules:
+- - cot: 'The error is triggered because the matrix sizes are incompatible for the
+      matrix multiplication. The input matrix A has dimensions [3, 4] and the input
+      matrix B has dimensions [4, 8]. In matrix multiplication, the number of columns
+      in the first matrix should be equal to the number of rows in the second matrix.
+
+
+      To prevent this error, the number of columns in A should be equal to the number
+      of rows in B. Therefore, the constraint can be formulated as:'
+    length: 1
+    target:
+      choosen_dtype:
+        a: tensor
+        b: tensor
+        name: str
+        transpose_a: bool
+        transpose_b: bool
+      msg: '{{function_node __wrapped__MatMul_device_/job:localhost/replica:0/task:0/device:CPU:0}}
+        Matrix size-incompatible: In[0]: [3,7], In[1]: [1,4] [Op:MatMul] name: kpto'
+      package: tensorflow
+    txt: a.shape[1] == b.shape[0]
+  - f1_score: 50.34965034965035
+    overall_score: 37.17482517482517
+    precision: 36.0
+    recall: 83.72093023255813
+- - cot: 'Based on the given runtime information, the constraint that prevents the
+      error is:'
+    length: 1
+    target:
+      choosen_dtype:
+        a: tensor
+        b: tensor
+        name: str
+        transpose_a: bool
+        transpose_b: bool
+      msg: 'cannot compute MatMul as input #1(zero-based) was expected to be a int32
+        tensor but is a float tensor [Op:MatMul] name: Dmip'
+      package: tensorflow
+    txt: dtype(b) == dtype(a)
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: divided
+    length: 1
+    target:
+      choosen_dtype:
+        a: tensor
+        b: tensor
+        name: str
+        transpose_a: bool
+        transpose_b: bool
+      msg: '{{function_node __wrapped__MatMul_device_/job:localhost/replica:0/task:0/device:CPU:0}}
+        In[0] and In[1] ndims must be == 2: 0 [Op:MatMul] name: Gpva'
+      package: tensorflow
+    txt: b.ndim == 2
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: divided
+    length: 1
+    target:
+      choosen_dtype:
+        a: tensor
+        b: tensor
+        name: str
+        transpose_a: bool
+        transpose_b: bool
+      msg: '{{function_node __wrapped__MatMul_device_/job:localhost/replica:0/task:0/device:CPU:0}}
+        In[0] and In[1] has different ndims: [7,7,7,7,7,7] vs. [8,5,9,4,5,5,5] [Op:MatMul]
+        name: ZpRz'
+      package: tensorflow
+    txt: a.rank == b.rank
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        a: float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+        b: float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+        name: str
+        transpose_a: bool
+        transpose_b: bool
+      msg: negative dimensions are not allowed
+      package: tensorflow
+    txt: all(i >= 0 for i in a.shape) and all(i >= 0 for i in b.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        a: float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+        b: float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+        name: str
+        transpose_a: bool
+        transpose_b: bool
+      msg: Too large tensor shape
+      package: tensorflow
+    txt: a.rank <= 7 and b.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

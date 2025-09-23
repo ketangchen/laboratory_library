@@ -1,0 +1,83 @@
+args:
+  dtype:
+  - Tensor
+  - Tensor
+  is_pos:
+  - true
+  - false
+  name:
+  - self
+  - other
+  required:
+  - true
+  - true
+name: torch.Tensor.bitwise_or
+package: torch
+pass_rate: 36.6
+rules:
+- - cot: ''
+    target:
+      choosen_dtype:
+        other: tensor
+        self: tensor
+      msg: The size of tensor a (6) must match the size of tensor b (7) at non-singleton
+        dimension 1
+      package: torch
+    txt: self.dim == other.dim and self.shape[3] == other.shape[3]
+  - f1_score: 29.65034965034965
+    overall_score: 13.392156862745098
+    precision: 20.784313725490197
+    recall: 51.707317073170735
+- - cot: synthesized
+    length: 2
+    target:
+      choosen_dtype:
+        other: tensor
+        self: tensor
+      msg: '"bitwise_or_cpu" not implemented for ''Float'''
+      package: torch
+    txt: (dtype(self) != "float32") and (dtype(other) in [int8, int16, int32, int64,
+      uint8, uint16, uint32, uint64])
+  - f1_score: 91.91176470588236
+    overall_score: 100
+    precision: 100.0
+    recall: 85.03401360544218
+- - cot: synthesized
+    length: 2
+    target:
+      choosen_dtype:
+        other: tensor
+        self: tensor
+      msg: 'Too large tensor shape: shape = [5, 8, 9, 9, 9, 9, 9, 9, 9]'
+      package: torch
+    txt: (len(self) > 0 and len(other) > 0) or (self.shape[7] <= 10)
+  - f1_score: 66.97923643670461
+    overall_score: 100
+    precision: 100.0
+    recall: 50.35246727089627
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        other: Tensor
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape) and all(i >= 0 for i in other.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        other: Tensor
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7 and other.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

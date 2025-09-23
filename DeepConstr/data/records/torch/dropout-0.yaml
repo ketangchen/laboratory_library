@@ -1,0 +1,63 @@
+args:
+  dtype:
+  - Tensor
+  - float
+  - bool
+  is_pos:
+  - false
+  - false
+  - false
+  name:
+  - input
+  - p
+  - train
+  required:
+  - true
+  - true
+  - true
+name: torch.dropout
+package: torch
+pass_rate: 100
+rules:
+- - cot: ''
+    length: 1
+    target:
+      choosen_dtype:
+        input: tensor
+        p: float
+        train: bool
+      msg: dropout probability has to be between 0 and 1, but got 7
+      package: torch
+    txt: 0<=p and p<=1
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        input: Tensor
+        p: float
+        train: bool
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in input.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        input: Tensor
+        p: float
+        train: bool
+      msg: Too large tensor shape
+      package: torch
+    txt: input.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

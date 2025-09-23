@@ -1,0 +1,58 @@
+args:
+  dtype:
+  - number
+  - Tensor
+  is_pos:
+  - false
+  - false
+  name:
+  - x
+  - n
+  required:
+  - true
+  - true
+name: torch._C._special.special_laguerre_polynomial_l
+package: torch
+pass_rate: 91.25
+rules:
+- - cot: 'The error is triggered because the result type Float cannot be cast to the
+      desired output type Short. Based on the given runtime information, the constraint
+      to prevent the error is:'
+    length: 1
+    target:
+      choosen_dtype:
+        n: tensor
+        x: int
+      msg: result type Float can't be cast to the desired output type Int
+      package: torch
+    txt: dtype(out) == dtype(n)
+  - f1_score: 87.69230769230768
+    overall_score: 51.03370786516854
+    precision: 96.06741573033707
+    recall: 80.66037735849056
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        n: Tensor
+        x: number
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in n.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        n: Tensor
+        x: number
+      msg: Too large tensor shape
+      package: torch
+    txt: n.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

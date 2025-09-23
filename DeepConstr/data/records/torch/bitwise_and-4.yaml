@@ -1,0 +1,101 @@
+args:
+  dtype:
+  - Tensor
+  - number
+  - Tensor
+  is_pos:
+  - true
+  - false
+  - false
+  name:
+  - self
+  - other
+  - out
+  required:
+  - true
+  - true
+  - true
+name: torch.bitwise_and
+package: torch
+pass_rate: 100
+rules:
+- - cot: 'Based on the given runtime information, the error occurs because the function
+      torch.bitwise_and does not support the ''Half'' data type. The ''self'' tensor
+      is provided as ''Half'' data type, which is not compatible. Hence, the constraint
+      to prevent the error is:'
+    length: 1
+    target:
+      choosen_dtype:
+        other: int
+        out: tensor
+        self: tensor
+      msg: '"bitwise_and_cpu" not implemented for ''Half'''
+      package: torch
+    txt: dtype(self) not in ["half"]
+  - f1_score: 98.84678747940691
+    overall_score: 61.42339373970346
+    precision: 100.0
+    recall: 97.71986970684038
+- - cot: 'The error is triggered because we are trying to resize the ''out'' tensor,
+      which is of type Tensor<f32>[2, 5, 3, 3, 4, 6, 3], but it is not resizable.
+      To prevent this error, the shape of the ''out'' tensor should match the shape
+      of the operation results, which is the shape of the ''self'' tensor, which is
+      of type Tensor<i64>[3, 7, 8, 8, 9, 8, 8].
+
+
+      Therefore, the condition to prevent this error is:'
+    length: 1
+    target:
+      choosen_dtype:
+        other: int
+        out: tensor
+        self: tensor
+      msg: Trying to resize storage that is not resizable
+      package: torch
+    txt: out.rank == self.rank and all(out.shape[i] == self.shape[i] for i in range(out.rank))
+  - f1_score: 75.47169811320754
+    overall_score: 49.73584905660377
+    precision: 100.0
+    recall: 60.60606060606061
+- - cot: divided
+    length: 1
+    target:
+      choosen_dtype:
+        other: int
+        out: tensor
+        self: tensor
+      msg: '"bitwise_and_cpu" not implemented for ''Float'''
+      package: torch
+    txt: (dtype(self) != 'Float')
+  - f1_score: 97.56097560975608
+    overall_score: 60.78048780487804
+    precision: 100.0
+    recall: 95.23809523809523
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        other: number
+        out: Tensor
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape) and all(i >= 0 for i in out.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        other: number
+        out: Tensor
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7 and out.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

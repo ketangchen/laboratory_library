@@ -1,0 +1,59 @@
+args:
+  dtype:
+  - float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+  - str
+  is_pos:
+  - false
+  - false
+  name:
+  - condition
+  - name
+  required:
+  - true
+  - false
+name: tf.raw_ops.Where
+package: tensorflow
+pass_rate: 100
+rules:
+- - cot: The error is triggered because the input tensor `condition` has 0 dimensions.
+      To prevent this error, we can add a constraint to ensure that the dimension
+      of `condition` is greater than 0.
+    length: 1
+    target:
+      choosen_dtype:
+        condition: tensor
+        name: str
+      msg: '{{function_node __wrapped__Where_device_/job:localhost/replica:0/task:0/device:CPU:0}}
+        WhereOp : Unhandled input dimensions: 0 [Op:Where] name: xdWi'
+      package: tensorflow
+    txt: condition.dim > 0
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        condition: float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+        name: str
+      msg: negative dimensions are not allowed
+      package: tensorflow
+    txt: all(i >= 0 for i in condition.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        condition: float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+        name: str
+      msg: Too large tensor shape
+      package: tensorflow
+    txt: condition.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

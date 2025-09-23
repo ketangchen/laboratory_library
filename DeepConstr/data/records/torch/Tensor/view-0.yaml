@@ -1,0 +1,56 @@
+args:
+  dtype:
+  - Tensor
+  - List[int]
+  is_pos:
+  - true
+  - false
+  name:
+  - self
+  - size
+  required:
+  - true
+  - true
+name: torch.Tensor.view
+package: torch
+pass_rate: 8.6
+rules:
+- - cot: divided
+    length: 1
+    target:
+      choosen_dtype:
+        self: tensor
+        size: list[int]
+      msg: invalid shape dimension -4
+      package: torch
+    txt: (size[i] > 0 for i in range(len(size)))
+  - f1_score: 98.61932938856016
+    overall_score: 100
+    precision: 100.0
+    recall: 97.27626459143968
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        self: Tensor
+        size: List[int]
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        self: Tensor
+        size: List[int]
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

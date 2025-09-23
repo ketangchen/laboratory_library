@@ -1,0 +1,152 @@
+args:
+  dtype:
+  - str
+  - float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+  - float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+  - float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+  - str
+  is_pos:
+  - false
+  - false
+  - false
+  - false
+  - false
+  name:
+  - align
+  - diagonal
+  - input
+  - k
+  - name
+  required:
+  - false
+  - true
+  - true
+  - true
+  - false
+name: tf.raw_ops.MatrixSetDiagV3
+package: tensorflow
+pass_rate: 0.0
+rules:
+- - cot: 'The error is due to an incorrect value for ''align'' from the input arguments.
+      The provided value is "gAhR", which is not one of the allowed values: "LEFT_RIGHT",
+      "RIGHT_LEFT", "LEFT_LEFT", "RIGHT_RIGHT". Therefore, the value of ''align''
+      should be corrected to one of the allowed values. Op : MatrixSetDiagV3, and
+      Right : ["LEFT_RIGHT", "RIGHT_LEFT", "LEFT_LEFT", "RIGHT_RIGHT"].'
+    length: 1
+    target:
+      choosen_dtype:
+        align: str
+        diagonal: tensor
+        input: tensor
+        k: tensor
+        name: str
+      msg: "Value for attr 'align' of \"cDQW\" is not in the list of allowed values:\
+        \ \"LEFT_RIGHT\", \"RIGHT_LEFT\", \"LEFT_LEFT\", \"RIGHT_RIGHT\"\n\t; NodeDef:\
+        \ {{node MatrixSetDiagV3}}; Op<name=MatrixSetDiagV3; signature=input:T, diagonal:T,\
+        \ k:int32 -> output:T; attr=T:type; attr=align:string,default=\"RIGHT_LEFT\"\
+        ,allowed=[\"LEFT_RIGHT\", \"RIGHT_LEFT\", \"LEFT_LEFT\", \"RIGHT_RIGHT\"]>\
+        \ [Op:MatrixSetDiagV3] name: JRKP"
+      package: tensorflow
+    txt: align in ["LEFT_RIGHT", "RIGHT_LEFT", "LEFT_LEFT", "RIGHT_RIGHT"]
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: synthesized
+    length: 4
+    target:
+      choosen_dtype:
+        align: str
+        diagonal: tensor
+        input: tensor
+        k: tensor
+        name: str
+      msg: 'cannot compute MatrixSetDiagV3 as input #2(zero-based) was expected to
+        be a int32 tensor but is a float tensor [Op:MatrixSetDiagV3] name: QbLB'
+      package: tensorflow
+    txt: ((dtype(k) == dtype(input)) and (dtype(input) == int32)) and ((dtype(diagonal)
+      == dtype(input)) or (dtype(k) == dtype(diagonal)))
+  - f1_score: 98.36065573770492
+    overall_score: 100
+    precision: 100.0
+    recall: 96.77419354838709
+- - cot: 'The error message indicates that ''k'' which is the diag_index is not a
+      scalar or vector, but has received a tensor with shape [3,9,2,5,9,9,9]. Therefore,
+      the Left : k.dim, Operator: ''<='', Right: 1.'
+    length: 1
+    target:
+      choosen_dtype:
+        align: str
+        diagonal: tensor
+        input: tensor
+        k: tensor
+        name: str
+      msg: '{{function_node __wrapped__MatrixSetDiagV3_device_/job:localhost/replica:0/task:0/device:CPU:0}}
+        diag_index must be a scalar or vector, received shape: [9,7,9,9,1,6,9] [Op:MatrixSetDiagV3]
+        name: dyYf'
+      package: tensorflow
+    txt: k.dim <= 1
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: "The error is triggered because the input tensor must be at least 2-dimensional.\
+      \ However, the input tensor received has a shape of []. \n\nTherefore, the condition\
+      \ to prevent this error is:"
+    length: 1
+    target:
+      choosen_dtype:
+        align: str
+        diagonal: tensor
+        input: tensor
+        k: tensor
+        name: str
+      msg: '{{function_node __wrapped__MatrixSetDiagV3_device_/job:localhost/replica:0/task:0/device:CPU:0}}
+        input must be at least 2-dim, received shape: [] [Op:MatrixSetDiagV3] name:
+        BisK'
+      package: tensorflow
+    txt: input.dim >= 2
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: The error is occurring because the 'lower_diag_index' is out of range. It
+      should be between -3 and 3. Here, 'k' denotes the diagonal indices. In the given
+      scenario, 'k' is an empty tensor which is resulting in an out of bound index.
+      Therefore, the values in 'k' tensor should be corrected to fall within the range
+      -3 to 3.
+    length: 1
+    target:
+      choosen_dtype:
+        align: str
+        diagonal: tensor
+        input: tensor
+        k: tensor
+        name: str
+      msg: '{{function_node __wrapped__MatrixSetDiagV3_device_/job:localhost/replica:0/task:0/device:CPU:0}}
+        lower_diag_index is out of bound: 749634 It must be between -8 and 8 [Op:MatrixSetDiagV3]
+        name: FCvL'
+      package: tensorflow
+    txt: -3 <= k[i] <= 3
+  - f1_score: 28.999999999999993
+    overall_score: 12.666666666666666
+    precision: 19.333333333333332
+    recall: 57.99999999999999
+- - cot: synthesized
+    length: 2
+    target:
+      choosen_dtype:
+        align: str
+        diagonal: tensor
+        input: tensor
+        k: tensor
+        name: str
+      msg: '{{function_node __wrapped__MatrixSetDiagV3_device_/job:localhost/replica:0/task:0/device:CPU:0}}
+        diag_index must have only one or two elements, received 5 elements. [Op:MatrixSetDiagV3]
+        name: xVmQ'
+      package: tensorflow
+    txt: ((len(k) == 2)) or (k.dim == 0)
+  - f1_score: 67.79661016949153
+    overall_score: 100
+    precision: 100.0
+    recall: 51.28205128205129

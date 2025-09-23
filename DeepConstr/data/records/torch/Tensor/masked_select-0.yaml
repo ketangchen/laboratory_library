@@ -1,0 +1,88 @@
+args:
+  dtype:
+  - Tensor
+  - Tensor
+  is_pos:
+  - true
+  - false
+  name:
+  - self
+  - mask
+  required:
+  - true
+  - true
+name: torch.Tensor.masked_select
+package: torch
+pass_rate: 100
+rules:
+- - cot: divided
+    length: 1
+    target:
+      choosen_dtype:
+        mask: tensor
+        self: tensor
+      msg: The size of tensor a (7) must match the size of tensor b (5) at non-singleton
+        dimension 8
+      package: torch
+    txt: mask.dim == self.dim
+  - f1_score: 90.99181073703367
+    overall_score: 57.49590536851684
+    precision: 100.0
+    recall: 83.47245409015025
+- - cot: ''
+    length: 1
+    target:
+      choosen_dtype:
+        mask: tensor
+        self: tensor
+      msg: 'masked_select: expected BoolTensor for mask'
+      package: torch
+    txt: mask.dtype == torch.bool
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: The error is caused by the shape of the input tensor being too large. The
+      input tensor has a shape of [8, 9, 7, 8, 9, 9, 7, 9, 9], which exceeds the maximum
+      size allowed. To prevent this error, the shape of the input tensor should be
+      reduced.
+    length: 1
+    target:
+      choosen_dtype:
+        mask: tensor
+        self: tensor
+      msg: 'Too large tensor shape: shape = [8, 9, 7, 8, 9, 9, 7, 9, 9]'
+      package: torch
+    txt: self.shape[0] <= 5 and self.shape[1] <= 5 and self.shape[2] <= 5 and self.shape[3]
+      <= 5 and self.shape[4] <= 5 and self.shape[5] <= 5 and self.shape[6] <= 5 and
+      self.shape[7] <= 5 and self.shape[8] <= 5
+  - f1_score: 79.74481658692184
+    overall_score: 51.87240829346092
+    precision: 100.0
+    recall: 66.3129973474801
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        mask: Tensor
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape) and all(i >= 0 for i in mask.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        mask: Tensor
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7 and mask.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

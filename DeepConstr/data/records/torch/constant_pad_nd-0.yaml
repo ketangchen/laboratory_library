@@ -1,0 +1,65 @@
+args:
+  dtype:
+  - Tensor
+  - List[int]
+  - number
+  is_pos:
+  - true
+  - false
+  - false
+  name:
+  - self
+  - pad
+  - value
+  required:
+  - true
+  - true
+  - false
+name: torch.constant_pad_nd
+package: torch
+pass_rate: 100
+rules:
+- - cot: The error occurs because the length of the `pad` parameter is not even. To
+      prevent this error, the constraint should ensure that the length of `pad` is
+      always even.
+    length: 1
+    target:
+      choosen_dtype:
+        pad: list[int]
+        self: tensor
+        value: int
+      msg: Length of pad must be even but instead it equals 1
+      package: torch
+    txt: len(pad) % 2 == 0
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        pad: List[int]
+        self: Tensor
+        value: number
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        pad: List[int]
+        self: Tensor
+        value: number
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

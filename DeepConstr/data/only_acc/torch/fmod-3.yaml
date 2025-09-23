@@ -1,0 +1,71 @@
+args:
+  dtype:
+  - Tensor
+  - number
+  is_pos:
+  - true
+  - false
+  name:
+  - self
+  - other
+  required:
+  - true
+  - true
+name: torch.fmod
+package: torch
+pass_rate: 100
+rules:
+- - cot: synthesized
+    length: 2
+    target:
+      choosen_dtype:
+        other: int
+        self: tensor
+      msg: result type Float can't be cast to the desired output type Int
+      package: torch
+    txt: (dtype(self) == Float32) or (dtype(out) == Int)
+  - f1_score: 67.34006734006734
+    overall_score: 100
+    precision: 100.0
+    recall: 50.76142131979695
+- - cot: The error is caused because the dimensions of the output tensor are negative.
+      To prevent this error, we need to ensure that the dimensions of the output tensor
+      are non-negative.
+    length: 1
+    target:
+      choosen_dtype:
+        other: int
+        self: tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(out.shape[i] >= 0 for i in range(out.rank))
+  - f1_score: 95.16908212560386
+    overall_score: 100
+    precision: 100.0
+    recall: 90.78341013824884
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        other: number
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        other: number
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

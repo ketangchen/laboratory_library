@@ -1,0 +1,84 @@
+args:
+  dtype:
+  - str
+  - float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+  - float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+  is_pos:
+  - false
+  - false
+  - false
+  name:
+  - name
+  - x
+  - y
+  required:
+  - false
+  - true
+  - true
+name: tf.raw_ops.SquaredDifference
+package: tensorflow
+pass_rate: 100
+rules:
+- - cot: ''
+    length: 1
+    target:
+      choosen_dtype:
+        name: str
+        x: tensor
+        y: tensor
+      msg: '{{function_node __wrapped__SquaredDifference_device_/job:localhost/replica:0/task:0/device:CPU:0}}
+        Incompatible shapes: [4,4] vs. [8,8,8] [Op:SquaredDifference] name: unch'
+      package: tensorflow
+    txt: len(x) == len(y) and all(x.shape[i] == y.shape[i] for i in range(x.rank))
+  - f1_score: 82.13552361396303
+    overall_score: 100
+    precision: 100.0
+    recall: 69.68641114982577
+- - cot: 'Based on the given runtime information, the error is triggered because the
+      function tf.raw_ops.SquaredDifference expects the input tensor at index 1 to
+      be of type int32, but it is of type float. To prevent the error, we need to
+      enforce that the datatype of the second input tensor matches the datatype of
+      the first input tensor. Therefore, the constraint that will prevent the error
+      is:'
+    length: 1
+    target:
+      choosen_dtype:
+        name: str
+        x: tensor
+        y: tensor
+      msg: 'cannot compute SquaredDifference as input #1(zero-based) was expected
+        to be a int32 tensor but is a float tensor [Op:SquaredDifference] name: yooK'
+      package: tensorflow
+    txt: dtype(y) == dtype(x)
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        name: str
+        x: float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+        y: float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+      msg: negative dimensions are not allowed
+      package: tensorflow
+    txt: all(i >= 0 for i in x.shape) and all(i >= 0 for i in y.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        name: str
+        x: float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+        y: float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+      msg: Too large tensor shape
+      package: tensorflow
+    txt: x.rank <= 7 and y.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

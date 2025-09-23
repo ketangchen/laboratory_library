@@ -1,0 +1,130 @@
+args:
+  dtype:
+  - Tensor
+  - Tensor
+  - Tensor
+  - number
+  - number
+  is_pos:
+  - true
+  - false
+  - false
+  - false
+  - false
+  name:
+  - self
+  - vec1
+  - vec2
+  - beta
+  - alpha
+  required:
+  - true
+  - true
+  - true
+  - false
+  - false
+name: torch.Tensor.addr
+package: torch
+pass_rate: 48.4
+rules:
+- - cot: synthesized
+    target:
+      choosen_dtype:
+        alpha: int
+        beta: int
+        self: tensor
+        vec1: tensor
+        vec2: tensor
+      msg: 'The expanded size of the tensor (7) must match the existing size (4) at
+        non-singleton dimension 1.  Target sizes: [6, 7].  Tensor sizes: [4]'
+      package: torch
+    txt: (vec2.shape[0] == self.shape[0]) and (vec2.dim(1) == self.dim(1))
+  - f1_score: 66.99025974983994
+    overall_score: 38.49512987491997
+    precision: 99.57805907172997
+    recall: 50.47264190372868
+- - cot: "The error occurs because the function torch.Tensor.addr expects a 1-dimensional\
+      \ tensor as the argument vec1, but it is given a 2-dimensional tensor instead.\
+      \ To prevent this error in the future and generate constraints that do not trigger\
+      \ it, we need to ensure that the argument vec1 has only 1 dimension. \n\nThe\
+      \ constraint for the dimension of vec1 can be expressed as:"
+    target:
+      choosen_dtype:
+        alpha: int
+        beta: int
+        self: tensor
+        vec1: tensor
+        vec2: tensor
+      msg: 'addr: Expected 1-D argument vec1, but got 2-D'
+      package: torch
+    txt: vec1.ndims() == 1
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 3
+    target:
+      choosen_dtype:
+        alpha: number
+        beta: number
+        self: Tensor
+        vec1: Tensor
+        vec2: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape) and all(i >= 0 for i in vec1.shape) and all(i
+      >= 0 for i in vec2.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 3
+    target:
+      choosen_dtype:
+        alpha: number
+        beta: number
+        self: Tensor
+        vec1: Tensor
+        vec2: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7 and vec1.rank <= 7 and vec2.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 3
+    target:
+      choosen_dtype:
+        alpha: number
+        beta: number
+        self: Tensor
+        vec1: Tensor
+        vec2: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape) and all(i >= 0 for i in vec1.shape) and all(i
+      >= 0 for i in vec2.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 3
+    target:
+      choosen_dtype:
+        alpha: number
+        beta: number
+        self: Tensor
+        vec1: Tensor
+        vec2: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7 and vec1.rank <= 7 and vec2.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

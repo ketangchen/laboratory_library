@@ -1,0 +1,78 @@
+args:
+  dtype:
+  - Tensor
+  - number
+  - bool
+  is_pos:
+  - true
+  - false
+  - false
+  name:
+  - self
+  - fill_value
+  - wrap
+  required:
+  - true
+  - true
+  - false
+name: torch.Tensor.fill_diagonal_
+package: torch
+pass_rate: 100
+rules:
+- - cot: 'To prevent the error, we need to ensure that all dimensions of the input
+      tensor are of equal length. We can express this constraint as follows:'
+    length: 1
+    target:
+      choosen_dtype:
+        fill_value: int
+        self: tensor
+        wrap: bool
+      msg: all dimensions of input must be of equal length
+      package: torch
+    txt: all(self.shape[i] == self.shape[0] for i in range(1, len(self.shape)))
+  - f1_score: 72.40547063555913
+    overall_score: 100
+    precision: 100.0
+    recall: 56.74653215636821
+- - cot: ''
+    length: 1
+    target:
+      choosen_dtype:
+        fill_value: int
+        self: tensor
+        wrap: bool
+      msg: dimensions must larger than 1
+      package: torch
+    txt: self.dim > 1
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        fill_value: number
+        self: Tensor
+        wrap: bool
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        fill_value: number
+        self: Tensor
+        wrap: bool
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

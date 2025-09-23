@@ -1,0 +1,99 @@
+args:
+  dtype:
+  - int,list[int]
+  - float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+  - bool
+  - str
+  is_pos:
+  - false
+  - false
+  - false
+  - false
+  name:
+  - axis
+  - input_tensor
+  - keepdims
+  - name
+  required:
+  - false
+  - true
+  - false
+  - false
+name: tf.math.reduce_min
+package: tensorflow
+pass_rate: 95.33333333333334
+rules:
+- - cot: '(tf.math.reduce_min(axis=7, input_tensor=Tensor<f32>[1, 1, 1, 1, 1, 1, 1],
+      keepdims=False, name=sCfZ) -> Invalid reduction dimension (7 for input with
+      7 dimension(s) [Op:Min] name: sCfZ)
+
+      The error can be prevented if the reduction dimension (axis) is less than the
+      number of dimensions in the input tensor. In this case, the input tensor has
+      7 dimensions, so the reduction dimension should be less than 7. Therefore, the
+      condition to prevent the error is:
+
+      (axis < input_tensor.rank)'
+    length: 1
+    target:
+      choosen_dtype:
+        axis: int
+        input_tensor: tensor
+        keepdims: bool
+        name: str
+      msg: '{{function_node __wrapped__Min_device_/job:localhost/replica:0/task:0/device:CPU:0}}
+        Invalid reduction dimension (8 for input with 7 dimension(s) [Op:Min] name:
+        QjTw'
+      package: tensorflow
+    txt: (axis < input_tensor.rank)
+  - f1_score: 93.61702127659575
+    overall_score: 58.808510638297875
+    precision: 88.0
+    recall: 100.0
+- - cot: synthesized
+    length: 3
+    target:
+      choosen_dtype:
+        axis: int
+        input_tensor: tensor
+        keepdims: bool
+        name: str
+      msg: '{{function_node __wrapped__Min_device_/job:localhost/replica:0/task:0/device:CPU:0}}
+        Invalid reduction dimension (11 for input with 2 dimension(s) [Op:Min] name:
+        ZUeP'
+      package: tensorflow
+    txt: (((axis < input_tensor.rank)) and ((8 < input_tensor.rank))) or ((axis >=
+      -input_tensor.rank))
+  - f1_score: 96.90721649484536
+    overall_score: 52.45360824742268
+    precision: 94.0
+    recall: 100.0
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        axis: int,list[int]
+        input_tensor: float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+        keepdims: bool
+        name: str
+      msg: negative dimensions are not allowed
+      package: tensorflow
+    txt: all(i >= 0 for i in input_tensor.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        axis: int,list[int]
+        input_tensor: float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+        keepdims: bool
+        name: str
+      msg: Too large tensor shape
+      package: tensorflow
+    txt: input_tensor.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

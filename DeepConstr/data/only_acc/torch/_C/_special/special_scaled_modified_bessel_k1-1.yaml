@@ -1,0 +1,49 @@
+args:
+  dtype:
+  - Tensor
+  is_pos:
+  - false
+  name:
+  - x
+  required:
+  - true
+name: torch._C._special.special_scaled_modified_bessel_k1
+package: torch
+pass_rate: 93.0
+rules:
+- - cot: ''
+    length: 1
+    target:
+      choosen_dtype:
+        x: tensor
+      msg: result type Float can't be cast to the desired output type Int
+      package: torch
+    txt: dtype(out) == dtype(x)
+  - f1_score: 90.68627450980392
+    overall_score: 49.25
+    precision: 92.5
+    recall: 88.9423076923077
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        x: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in x.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        x: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: x.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

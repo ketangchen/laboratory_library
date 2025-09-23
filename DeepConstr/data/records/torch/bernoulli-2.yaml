@@ -1,0 +1,65 @@
+args:
+  dtype:
+  - Tensor
+  - float
+  - Optional[Generator]
+  is_pos:
+  - true
+  - false
+  - false
+  name:
+  - self
+  - p
+  - generator
+  required:
+  - true
+  - true
+  - false
+name: torch.bernoulli
+package: torch
+pass_rate: 100
+rules:
+- - cot: 'The error occurs because the value of ''p'' is outside the valid range of
+      [0, 1]. To prevent this error, we need to ensure that the value of ''p'' falls
+      within the valid range. The constraint for the ''p'' parameter can be expressed
+      as:'
+    length: 1
+    target:
+      choosen_dtype:
+        p: float
+        self: tensor
+      msg: bernoulli_ expects p to be in [0, 1], but got p=3
+      package: torch
+    txt: p >= 0 and p <= 1
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        generator: Optional[Generator]
+        p: float
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        generator: Optional[Generator]
+        p: float
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

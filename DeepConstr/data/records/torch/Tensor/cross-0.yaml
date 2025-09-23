@@ -1,0 +1,110 @@
+args:
+  dtype:
+  - Tensor
+  - Tensor
+  - Optional[int]
+  is_pos:
+  - true
+  - false
+  - false
+  name:
+  - self
+  - other
+  - dim
+  required:
+  - true
+  - true
+  - false
+name: torch.Tensor.cross
+package: torch
+pass_rate: 0.0
+rules:
+- - cot: 'Based on the given runtime information, the error is triggered because the
+      number of dimensions of the two tensors, `self` and `other`, are not the same.
+      The `self` tensor has 4 dimensions while the `other` tensor has 8 dimensions.
+      To prevent this error, we need to ensure that the two tensors have the same
+      number of dimensions. Therefore, the constraint can be formulated as:'
+    length: 1
+    target:
+      choosen_dtype:
+        dim: int
+        other: tensor
+        self: tensor
+      msg: 'linalg.cross: inputs must have the same number of dimensions.'
+      package: torch
+    txt: self.dim() == other.dim()
+  - f1_score: 96.52509652509652
+    overall_score: 100
+    precision: 100.0
+    recall: 93.28358208955223
+- - cot: synthesized
+    length: 3
+    target:
+      choosen_dtype:
+        dim: None
+        other: tensor
+        self: tensor
+      msg: no dimension of size 3 in input
+      package: torch
+    txt: ((self.dim() == other.dim()) and (self.size(1) == other.size(1))) and (3
+      in self.shape)
+  - f1_score: 90.33423667570008
+    overall_score: 100
+    precision: 100.0
+    recall: 82.37232289950576
+- - cot: divided
+    length: 1
+    target:
+      choosen_dtype:
+        dim: None
+        other: tensor
+        self: tensor
+      msg: 'Too large tensor shape: shape = [4, 9, 9, 9, 9, 9, 9, 9, 9]'
+      package: torch
+    txt: len(other.shape) < 4
+  - f1_score: 66.71114076050699
+    overall_score: 100
+    precision: 100.0
+    recall: 50.050050050050054
+- - cot: 'The error occurs because the dimension provided is out of the valid range.
+      The valid range for the dimension would be [-9, 8] for the given tensor shapes.
+      To prevent this error in the future and generate constraints that do not trigger
+      it, we need to ensure that the "dim" value is always within the valid range
+      for the given tensor.
+
+
+      If we denote the shape of the input tensor as `input_shape`, the constraint
+      for the ''dim'' parameter can be expressed as:'
+    length: 1
+    target:
+      choosen_dtype:
+        dim: int
+        other: tensor
+        self: tensor
+      msg: Dimension out of range (expected to be in range of [-9, 8], but got 23)
+      package: torch
+    txt: -9 <= dim < 9
+  - f1_score: 66.66666666666667
+    overall_score: 100
+    precision: 100.0
+    recall: 50.0
+- - cot: 'The error is caused because the dimensions of the input tensors are inconsistent.
+      The function `torch.Tensor.cross` expects the fourth dimension of the input
+      tensors to have a length of 3, but it received lengths of 3 and 9 instead.
+
+
+      To prevent this error, the fourth dimension of both input tensors should have
+      a length of 3. Therefore, the following constraint should be applied:'
+    length: 1
+    target:
+      choosen_dtype:
+        dim: None
+        other: tensor
+        self: tensor
+      msg: 'linalg.cross: inputs dimension 4 must have length 3. Got 3 and 9'
+      package: torch
+    txt: other.shape[3] == 3
+  - f1_score: 66.66666666666667
+    overall_score: 100
+    precision: 100.0
+    recall: 50.0

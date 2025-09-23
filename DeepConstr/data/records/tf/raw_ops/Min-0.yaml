@@ -1,0 +1,71 @@
+args:
+  dtype:
+  - list[int]
+  - float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+  - bool
+  - str
+  is_pos:
+  - false
+  - false
+  - false
+  - false
+  name:
+  - axis
+  - input
+  - keep_dims
+  - name
+  required:
+  - false
+  - true
+  - false
+  - false
+name: tf.raw_ops.Min
+package: tensorflow
+pass_rate: 45.5
+rules:
+- - cot: ''
+    length: 1
+    target:
+      choosen_dtype:
+        axis: list[int]
+        input: tensor
+        keep_dims: bool
+        name: str
+      msg: '{{function_node __wrapped__Min_device_/job:localhost/replica:0/task:0/device:CPU:0}}
+        Invalid reduction dimension (9 for input with 5 dimension(s) [Op:Min]'
+      package: tensorflow
+    txt: (all(axis[i] < input.rank for i in range(len(axis))))
+  - f1_score: 82.4561403508772
+    overall_score: 53.2280701754386
+    precision: 70.5
+    recall: 99.29577464788733
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        axis: list[int]
+        input: float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+        keep_dims: bool
+        name: str
+      msg: negative dimensions are not allowed
+      package: tensorflow
+    txt: all(i >= 0 for i in input.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        axis: list[int]
+        input: float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+        keep_dims: bool
+        name: str
+      msg: Too large tensor shape
+      package: tensorflow
+    txt: input.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

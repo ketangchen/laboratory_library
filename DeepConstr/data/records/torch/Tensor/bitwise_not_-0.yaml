@@ -1,0 +1,61 @@
+args:
+  dtype:
+  - Tensor
+  is_pos:
+  - true
+  name:
+  - self
+  required:
+  - true
+name: torch.Tensor.bitwise_not_
+package: torch
+pass_rate: 100
+rules:
+- - cot: 'Based on the given error message, the error arises because the function
+      `torch.Tensor.bitwise_not_` does not support the ''Float'' datatype. The runtime
+      information shows that the input tensor `self` has the dtype ''Float'' (f32).
+
+
+      To prevent the error, the input tensor `self` should have a datatype that is
+      one of the supported types for the `bitwise_not_` operation. These supported
+      types include ''half'', ''int16'', ''int32'', ''int64'', ''uint8'', ''uint16'',
+      ''uint32'', and ''uint64''.
+
+
+      Therefore, the constraint that can prevent the error is:'
+    length: 1
+    target:
+      choosen_dtype:
+        self: tensor
+      msg: '"bitwise_not_cpu" not implemented for ''Float'''
+      package: torch
+    txt: dtype(self) in ["half", "int16", "int32", "int64", "uint8", "uint16", "uint32",
+      "uint64"]
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

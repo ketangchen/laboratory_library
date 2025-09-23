@@ -1,0 +1,58 @@
+args:
+  dtype:
+  - Tensor
+  - bool
+  is_pos:
+  - false
+  - false
+  name:
+  - input
+  - inplace
+  required:
+  - true
+  - false
+name: torch.nn.functional.silu
+package: torch
+pass_rate: 95.33333333333334
+rules:
+- - cot: The error is due to the input tensor having dtype 'Int' which is not supported
+      by the 'silu' function. Therefore, a constraint should be added to ensure that
+      the input tensor has a dtype other than 'Int'.
+    length: 1
+    target:
+      choosen_dtype:
+        inplace: bool
+        input: tensor
+      msg: '"silu_cpu" not implemented for ''Int'''
+      package: torch
+    txt: input.dtype != torch.int32
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        inplace: bool
+        input: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in input.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        inplace: bool
+        input: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: input.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

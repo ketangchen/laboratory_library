@@ -1,0 +1,94 @@
+args:
+  dtype:
+  - Tensor
+  - Optional[List[int]]
+  - Optional[List[int]]
+  - Optional[str]
+  is_pos:
+  - true
+  - false
+  - false
+  - false
+  name:
+  - self
+  - s
+  - dim
+  - norm
+  required:
+  - true
+  - false
+  - false
+  - false
+name: torch._C._fft.fft_ihfftn
+package: torch
+pass_rate: 99.65753424657534
+rules:
+- - cot: 'Based on the given runtime information `torch._C._fft.fft_ihfftn(self=Tensor<f32>[1,
+      1, 1, 1, 1, 3] norm=u3WjXW76AK)`, the error is triggered due to an invalid normalization
+      mode. The normalization mode provided is "u3WjXW76AK", which is not a valid
+      normalization mode for the function `fft_ihfftn`.
+
+
+      To prevent this error, the normalization mode should be one of the allowed values
+      for normalization, which are typically "backward" or "ortho". Therefore, the
+      constraint to prevent this error would be:'
+    target:
+      choosen_dtype:
+        dim: None
+        norm: str
+        s: None
+        self: tensor
+      msg: 'Invalid normalization mode: ""'
+      package: torch
+    txt: norm in ["backward", "ortho"]
+  - f1_score: 66.66666666666667
+    overall_score: 100
+    precision: 100.0
+    recall: 50.0
+- - cot: 'The error is triggered because the `ihfftn` function requires at least one
+      axis to be transformed. Let''s see what the runtime information tells us. The
+      function was called with an empty tensor `self=Tensor<f32>[]`. Therefore, we
+      can formulate the constraint as follows:'
+    target:
+      choosen_dtype:
+        dim: None
+        norm: None
+        s: None
+        self: tensor
+      msg: ihfftn must transform at least one axis
+      package: torch
+    txt: self.ndim > 0
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        dim: Optional[List[int]]
+        norm: Optional[str]
+        s: Optional[List[int]]
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        dim: Optional[List[int]]
+        norm: Optional[str]
+        s: Optional[List[int]]
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

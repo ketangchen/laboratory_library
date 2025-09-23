@@ -1,0 +1,85 @@
+args:
+  dtype:
+  - Tensor
+  - Optional[List[int]]
+  - Optional[number]
+  - bool
+  is_pos:
+  - true
+  - false
+  - false
+  - false
+  name:
+  - self
+  - dim
+  - correction
+  - keepdim
+  required:
+  - true
+  - false
+  - false
+  - false
+name: torch.std
+package: torch
+pass_rate: 100
+rules:
+- - cot: divided
+    length: 1
+    target:
+      choosen_dtype:
+        correction: int
+        dim: None
+        keepdim: bool
+        self: tensor
+      msg: std and var only support floating point and complex dtypes
+      package: torch
+    txt: self.dtype == complex64
+  - f1_score: 67.79661016949153
+    overall_score: 100
+    precision: 100.0
+    recall: 51.28205128205129
+- - cot: divided
+    length: 1
+    target:
+      choosen_dtype:
+        correction: int
+        dim: None
+        keepdim: bool
+        self: tensor
+      msg: Trying to resize storage that is not resizable
+      package: torch
+    txt: all(out.shape[i] == self.shape[i] for i in range(out.rank))
+  - f1_score: 66.96428571428572
+    overall_score: 100
+    precision: 100.0
+    recall: 50.335570469798654
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        correction: Optional[number]
+        dim: Optional[List[int]]
+        keepdim: bool
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        correction: Optional[number]
+        dim: Optional[List[int]]
+        keepdim: bool
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

@@ -1,0 +1,96 @@
+args:
+  dtype:
+  - Tensor
+  - float
+  - bool
+  is_pos:
+  - true
+  - false
+  - false
+  name:
+  - self
+  - tol
+  - hermitian
+  required:
+  - true
+  - true
+  - false
+name: torch._C._linalg.linalg_matrix_rank
+package: torch
+pass_rate: 98.21428571428571
+rules:
+- - cot: 'The error is indicating that the input tensor ''self'' must have at least
+      2 dimensions. Therefore, we can formulate a constraint as follows:'
+    length: 1
+    target:
+      choosen_dtype:
+        hermitian: bool
+        self: tensor
+        tol: float
+      msg: 'torch.linalg.matrix_rank: The input tensor input must have at least 2
+        dimensions.'
+      package: torch
+    txt: self.dim() >= 2
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: 'Based on the given runtime information, the constraint to prevent the error
+      is:'
+    length: 1
+    target:
+      choosen_dtype:
+        hermitian: bool
+        self: tensor
+        tol: float
+      msg: 'linalg.eigh: A must be batches of square matrices, but they are 3 by 1
+        matrices'
+      package: torch
+    txt: self.size(-1) == self.size(-2)
+  - f1_score: 78.68852459016394
+    overall_score: 100
+    precision: 100.0
+    recall: 64.86486486486487
+- - cot: ''
+    length: 1
+    target:
+      choosen_dtype:
+        hermitian: bool
+        self: tensor
+        tol: float
+      msg: 'linalg.svd: Expected a floating point or complex tensor as input. Got
+        Int'
+      package: torch
+    txt: dtype(self) in [torch.float32, torch.float64, torch.complex64, torch.complex128]
+  - f1_score: 80.08849557522124
+    overall_score: 100
+    precision: 100.0
+    recall: 66.78966789667896
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        hermitian: bool
+        self: Tensor
+        tol: float
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        hermitian: bool
+        self: Tensor
+        tol: float
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

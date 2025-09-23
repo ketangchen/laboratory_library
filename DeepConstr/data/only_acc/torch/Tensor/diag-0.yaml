@@ -1,0 +1,55 @@
+args:
+  dtype:
+  - Tensor
+  - int
+  is_pos:
+  - true
+  - false
+  name:
+  - self
+  - diagonal
+  required:
+  - true
+  - false
+name: torch.Tensor.diag
+package: torch
+pass_rate: 70.7843137254902
+rules:
+- - cot: ''
+    target:
+      choosen_dtype:
+        diagonal: int
+        self: tensor
+      msg: 'diag(): Supports 1D or 2D tensors. Got 5D'
+      package: torch
+    txt: self.dim <= 2
+  - f1_score: 68.00000000000001
+    overall_score: 100
+    precision: 100.0
+    recall: 51.515151515151516
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        diagonal: int
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        diagonal: int
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

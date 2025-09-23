@@ -1,0 +1,56 @@
+args:
+  dtype:
+  - Tensor
+  - Optional[int]
+  is_pos:
+  - false
+  - false
+  name:
+  - x
+  - N
+  required:
+  - true
+  - false
+name: torch._C._linalg.linalg_vander
+package: torch
+pass_rate: 100
+rules:
+- - cot: ''
+    length: 1
+    target:
+      choosen_dtype:
+        N: int
+        x: tensor
+      msg: N must be greater than 1.
+      package: torch
+    txt: N > 1
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        N: Optional[int]
+        x: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in x.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        N: Optional[int]
+        x: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: x.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

@@ -1,0 +1,121 @@
+args:
+  dtype:
+  - Tensor
+  - Tensor
+  - Tensor
+  is_pos:
+  - true
+  - false
+  - false
+  name:
+  - self
+  - LU_data
+  - LU_pivots
+  required:
+  - true
+  - true
+  - true
+name: torch.Tensor.lu_solve
+package: torch
+pass_rate: 0.0
+rules:
+- - cot: 'The error is due to incompatible shapes of A and B for the equation AX =
+      B (9x9 and 3x7). Looking at the arguments, LU_data and self seems to represent
+      A and B respectively. Therefore, the constraint should be that the shape of
+      A and B must match in a way that they can perform the matrix multiplication
+      required for the equation AX = B. This means the number of columns in A should
+      be equal to the number of rows in B. In python terms, the last dimension of
+      LU_data should be same as the second last dimension of self. So, Op : ==, Right
+      : LU_data.shape[-1]'
+    length: 1
+    target:
+      choosen_dtype:
+        LU_data: tensor
+        LU_pivots: tensor
+        self: tensor
+      msg: 'linalg.lu_solve: Incompatible shapes of A and B for the equation AX =
+        B (9x9 and 7x7)'
+      package: torch
+    txt: LU_data.shape[-1] == self.shape[-2]
+  - f1_score: 72.20216606498195
+    overall_score: 48.101083032490976
+    precision: 100.0
+    recall: 56.49717514124294
+- - cot: synthesized
+    length: 2
+    target:
+      choosen_dtype:
+        LU_data: tensor
+        LU_pivots: tensor
+        self: tensor
+      msg: 'linalg.lu_solve: The input tensor B must have at least 2 dimensions.'
+      package: torch
+    txt: (self.dim() >= 2) and (LU_data.dim() >= 2)
+  - f1_score: 94.7867298578199
+    overall_score: 53.39336492890995
+    precision: 100.0
+    recall: 90.09009009009009
+- - cot: ''
+    length: 1
+    target:
+      choosen_dtype:
+        LU_data: tensor
+        LU_pivots: tensor
+        self: tensor
+      msg: 'linalg.lu_solve: pivots should be a Tensor of scalar type torch.int32'
+      package: torch
+    txt: LU_pivots.dtype == torch.int32
+  - f1_score: 83.82229673093042
+    overall_score: 53.91114836546521
+    precision: 100.0
+    recall: 72.15007215007215
+- - cot: The error occurs because the shape of the tensor LU_data is too large. Therefore,
+      the constraint to prevent this error would be limiting the tensor shape. One
+      possible constraint could be to limit the number of dimensions and the size
+      of each dimension of the tensor LU_data. For example, we could limit the number
+      of dimensions to a maximum of 3 and the size of each dimension to a maximum
+      of 1000.
+    length: 1
+    target:
+      choosen_dtype:
+        LU_data: tensor
+        LU_pivots: tensor
+        self: tensor
+      msg: 'Too large tensor shape: shape = [9, 7, 9, 9, 9, 9, 9, 9, 9]'
+      package: torch
+    txt: len(LU_data.shape) <= 3 and all(size <= 1000 for size in LU_data.shape)
+  - f1_score: 85.66108007448788
+    overall_score: 54.83054003724394
+    precision: 92.0
+    recall: 80.13937282229965
+- - cot: synthesized
+    length: 2
+    target:
+      choosen_dtype:
+        LU_data: tensor
+        LU_pivots: tensor
+        self: tensor
+      msg: 'torch.linalg.lu_solve: Expected a floating point or complex tensor as
+        input. Got Int'
+      package: torch
+    txt: (self.dtype == torch.complex64) or (self.dtype == torch.float32 or self.dtype
+      == torch.float64)
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: ''
+    length: 1
+    target:
+      choosen_dtype:
+        LU_data: tensor
+        LU_pivots: tensor
+        self: tensor
+      msg: 'linalg.lu_solve: Expected LU and B to have the same dtype, but found LU
+        of type Float and B of type ComplexFloat instead'
+      package: torch
+    txt: dtype(LU_data) == dtype(self)
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0

@@ -1,0 +1,93 @@
+args:
+  dtype:
+  - Tensor
+  - int
+  - int
+  is_pos:
+  - true
+  - false
+  - false
+  name:
+  - self
+  - chunks
+  - dim
+  required:
+  - true
+  - true
+  - false
+name: torch.Tensor.chunk
+package: torch
+pass_rate: 100
+rules:
+- - cot: ''
+    length: 1
+    target:
+      choosen_dtype:
+        chunks: int
+        dim: int
+        self: tensor
+      msg: chunk expects at least a 1-dimensional tensor
+      package: torch
+    txt: self.ndim() >= 1
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: 'The error is triggered because the value of `chunks` is 0, which is not
+      valid. To prevent this error, we need to ensure that `chunks` is always greater
+      than 0. The constraint for the `chunks` parameter can be expressed as:'
+    length: 1
+    target:
+      choosen_dtype:
+        chunks: int
+        dim: int
+        self: tensor
+      msg: 'chunk expects `chunks` to be greater than 0, got: 0'
+      package: torch
+    txt: chunks > 0
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: divided
+    length: 1
+    target:
+      choosen_dtype:
+        chunks: int
+        dim: int
+        self: tensor
+      msg: Dimension out of range (expected to be in range of [-1, 0], but got 82)
+      package: torch
+    txt: dim < len(self.shape)
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        chunks: int
+        dim: int
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        chunks: int
+        dim: int
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

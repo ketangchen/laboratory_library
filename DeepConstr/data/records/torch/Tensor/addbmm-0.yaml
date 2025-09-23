@@ -1,0 +1,188 @@
+args:
+  dtype:
+  - Tensor
+  - Tensor
+  - Tensor
+  - number
+  - number
+  is_pos:
+  - true
+  - false
+  - false
+  - false
+  - false
+  name:
+  - self
+  - batch1
+  - batch2
+  - beta
+  - alpha
+  required:
+  - true
+  - true
+  - true
+  - false
+  - false
+name: torch.Tensor.addbmm
+package: torch
+pass_rate: 3.5999999999999996
+rules:
+- - cot: ''
+    target:
+      choosen_dtype:
+        alpha: int
+        batch1: tensor
+        batch2: tensor
+        beta: int
+        self: tensor
+      msg: Dimension out of range (expected to be in range of [-1, 0], but got 1)
+      package: torch
+    txt: -len(batch1.shape) <= 2 < len(batch1.shape)
+  - f1_score: 73.81051613334775
+    overall_score: 34.52400835073068
+    precision: 63.04801670146137
+    recall: 89.00374132143722
+- - cot: ''
+    target:
+      choosen_dtype:
+        alpha: int
+        batch1: tensor
+        batch2: tensor
+        beta: int
+        self: tensor
+      msg: 'The expanded size of the tensor (4) must match the existing size (5) at
+        non-singleton dimension 1.  Target sizes: [2, 4].  Tensor sizes: [5]'
+      package: torch
+    txt: batch1.shape[1] == batch2.shape[1] == self.shape[0]
+  - f1_score: 69.90838618745595
+    overall_score: 100
+    precision: 100.0
+    recall: 53.737811484290354
+- - cot: synthesized
+    target:
+      choosen_dtype:
+        alpha: int
+        batch1: tensor
+        batch2: tensor
+        beta: int
+        self: tensor
+      msg: Dimension specified as 1 but tensor has no dimensions
+      package: torch
+    txt: (2 < len(batch1.shape)) and (len(batch2.shape) > 0)
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: ''
+    target:
+      choosen_dtype:
+        alpha: int
+        batch1: tensor
+        batch2: tensor
+        beta: int
+        self: tensor
+      msg: batch2 must be a 3D tensor
+      package: torch
+    txt: batch2.dim() == 3
+  - f1_score: 68.42470506592645
+    overall_score: 100
+    precision: 100.0
+    recall: 52.004219409282705
+- - cot: ''
+    length: 1
+    target:
+      choosen_dtype:
+        alpha: int
+        batch1: tensor
+        batch2: tensor
+        beta: int
+        self: tensor
+      msg: Incompatible matrix sizes for bmm (6x8 and 5x2)
+      package: torch
+    txt: batch1.shape[-1] == batch2.shape[-2]
+  - f1_score: 70.0770847932726
+    overall_score: 47.0385423966363
+    precision: 100.0
+    recall: 53.937432578209275
+- - cot: ''
+    length: 1
+    target:
+      choosen_dtype:
+        alpha: int
+        batch1: tensor
+        batch2: tensor
+        beta: int
+        self: tensor
+      msg: batch1 and batch2 must have same number of batches, got 9 and 8
+      package: torch
+    txt: batch1.shape[0] == batch2.shape[0]
+  - f1_score: 67.11409395973153
+    overall_score: 45.55704697986577
+    precision: 100.0
+    recall: 50.505050505050505
+- - cot: default
+    length: 3
+    target:
+      choosen_dtype:
+        alpha: number
+        batch1: Tensor
+        batch2: Tensor
+        beta: number
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape) and all(i >= 0 for i in batch1.shape) and
+      all(i >= 0 for i in batch2.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 3
+    target:
+      choosen_dtype:
+        alpha: number
+        batch1: Tensor
+        batch2: Tensor
+        beta: number
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7 and batch1.rank <= 7 and batch2.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 3
+    target:
+      choosen_dtype:
+        alpha: number
+        batch1: Tensor
+        batch2: Tensor
+        beta: number
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape) and all(i >= 0 for i in batch1.shape) and
+      all(i >= 0 for i in batch2.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 3
+    target:
+      choosen_dtype:
+        alpha: number
+        batch1: Tensor
+        batch2: Tensor
+        beta: number
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7 and batch1.rank <= 7 and batch2.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

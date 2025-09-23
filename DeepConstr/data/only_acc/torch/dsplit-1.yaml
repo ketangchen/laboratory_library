@@ -1,0 +1,59 @@
+args:
+  dtype:
+  - Tensor
+  - List[int]
+  is_pos:
+  - true
+  - false
+  name:
+  - self
+  - indices
+  required:
+  - true
+  - true
+name: torch.dsplit
+package: torch
+pass_rate: 100
+rules:
+- - cot: 'Error is triggered because the provided tensor has only 2 dimensions, but
+      torch.dsplit requires a tensor with at least 3 dimensions. Therefore, the constraint
+      to prevent this error is:'
+    length: 1
+    target:
+      choosen_dtype:
+        indices: list[int]
+        self: tensor
+      msg: torch.dsplit requires a tensor with at least 3 dimension, but got a tensor
+        with 2 dimensions!
+      package: torch
+    txt: self.dim >= 3
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        indices: List[int]
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        indices: List[int]
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

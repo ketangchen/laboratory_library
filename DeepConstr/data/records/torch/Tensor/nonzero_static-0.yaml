@@ -1,0 +1,63 @@
+args:
+  dtype:
+  - Tensor
+  - int
+  - int
+  is_pos:
+  - true
+  - false
+  - false
+  name:
+  - self
+  - size
+  - fill_value
+  required:
+  - true
+  - true
+  - false
+name: torch.Tensor.nonzero_static
+package: torch
+pass_rate: 100
+rules:
+- - cot: divided
+    length: 1
+    target:
+      choosen_dtype:
+        fill_value: int
+        self: tensor
+        size: int
+      msg: 'nonzero_static: ''size'' must be an non-negative integer'
+      package: torch
+    txt: size >= 0
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        fill_value: int
+        self: Tensor
+        size: int
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        fill_value: int
+        self: Tensor
+        size: int
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

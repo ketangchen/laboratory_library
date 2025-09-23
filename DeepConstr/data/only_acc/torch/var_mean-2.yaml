@@ -1,0 +1,75 @@
+args:
+  dtype:
+  - Tensor
+  - Optional[List[int]]
+  - Optional[number]
+  - bool
+  is_pos:
+  - true
+  - false
+  - false
+  - false
+  name:
+  - self
+  - dim
+  - correction
+  - keepdim
+  required:
+  - true
+  - false
+  - false
+  - false
+name: torch.var_mean
+package: torch
+pass_rate: 100
+rules:
+- - cot: "The error is caused because the input tensor has an unsupported dtype. The\
+      \ error message suggests that var_mean only supports floating point and complex\
+      \ dtypes. \n\nTo prevent the error, we need to make sure that the input tensor\
+      \ has a supported dtype. We can do this by checking the dtype of the input tensor\
+      \ and ensuring that it is either a floating point or complex dtype. \n\nThe\
+      \ condition that prevents the error is:"
+    length: 1
+    target:
+      choosen_dtype:
+        correction: None
+        dim: None
+        keepdim: bool
+        self: tensor
+      msg: var_mean only support floating point and complex dtypes
+      package: torch
+    txt: self.dtype in [torch.float32, torch.float64, torch.complex64, torch.complex128]
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        correction: Optional[number]
+        dim: Optional[List[int]]
+        keepdim: bool
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        correction: Optional[number]
+        dim: Optional[List[int]]
+        keepdim: bool
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

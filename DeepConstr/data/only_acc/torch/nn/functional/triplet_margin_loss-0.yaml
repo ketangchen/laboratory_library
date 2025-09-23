@@ -1,0 +1,172 @@
+args:
+  dtype:
+  - Tensor
+  - Tensor
+  - Tensor
+  - float
+  - float
+  - float
+  - bool
+  - Optional[bool]
+  - Optional[bool]
+  - str
+  is_pos:
+  - false
+  - false
+  - false
+  - false
+  - false
+  - false
+  - false
+  - false
+  - false
+  - false
+  name:
+  - anchor
+  - positive
+  - negative
+  - margin
+  - p
+  - eps
+  - swap
+  - size_average
+  - reduce
+  - reduction
+  required:
+  - true
+  - true
+  - true
+  - false
+  - false
+  - false
+  - false
+  - false
+  - false
+  - false
+name: torch.nn.functional.triplet_margin_loss
+package: torch
+pass_rate: 100
+rules:
+- - cot: 'The error is caused because the anchor, positive, and negative tensors have
+      different numbers of dimensions. Let''s see what the args were. It seems that
+      the anchor tensor has 7 dimensions, the positive tensor has 7 dimensions, and
+      the negative tensor has 0 dimensions. To prevent the error, the anchor, positive,
+      and negative tensors should have the same number of dimensions. Therefore, the
+      dimensions of the anchor, positive, and negative tensors should be equal. So,
+      Op : ==, and Right : anchor.rank, positive.rank, and negative.rank.'
+    length: 1
+    target:
+      choosen_dtype:
+        anchor: tensor
+        eps: float
+        margin: float
+        negative: tensor
+        p: float
+        positive: tensor
+        reduce: None
+        reduction: str
+        size_average: bool
+        swap: bool
+      msg: 'The anchor, positive, and negative tensors are expected to have the same
+        number of dimensions, but got: anchor 2D, positive 3D, and negative 4D inputs'
+      package: torch
+    txt: anchor.rank == positive.rank == negative.rank
+  - f1_score: 89.82035928143713
+    overall_score: 100
+    precision: 100.0
+    recall: 81.5217391304348
+- - cot: 'Based on the given runtime information, the error message suggests that
+      the size of tensor `anchor` (5) must match the size of tensor `positive` (9)
+      at non-singleton dimension 1.
+
+
+      To prevent this error, the following constraint should be added:'
+    length: 1
+    target:
+      choosen_dtype:
+        anchor: tensor
+        eps: float
+        margin: float
+        negative: tensor
+        p: float
+        positive: tensor
+        reduce: bool
+        reduction: str
+        size_average: None
+        swap: bool
+      msg: The size of tensor a (6) must match the size of tensor b (9) at non-singleton
+        dimension 1
+      package: torch
+    txt: anchor.shape[1] == positive.shape[1]
+  - f1_score: 85.71428571428571
+    overall_score: 100
+    precision: 100.0
+    recall: 75.0
+- - cot: 'The error is due to an invalid value for the ''reduction'' argument. The
+      provided value is ''RtND'', which is not a valid value for ''reduction''. The
+      valid values for ''reduction'' are [''none'', ''mean'', ''sum'']. To prevent
+      the error, the ''reduction'' argument should be set to one of the valid values.
+      The constraint for the ''reduction'' argument is:'
+    length: 1
+    target:
+      choosen_dtype:
+        anchor: tensor
+        eps: float
+        margin: float
+        negative: tensor
+        p: float
+        positive: tensor
+        reduce: None
+        reduction: str
+        size_average: None
+        swap: bool
+      msg: OROP is not a valid value for reduction
+      package: torch
+    txt: reduction in ['none', 'mean', 'sum']
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 3
+    target:
+      choosen_dtype:
+        anchor: Tensor
+        eps: float
+        margin: float
+        negative: Tensor
+        p: float
+        positive: Tensor
+        reduce: Optional[bool]
+        reduction: str
+        size_average: Optional[bool]
+        swap: bool
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in anchor.shape) and all(i >= 0 for i in positive.shape)
+      and all(i >= 0 for i in negative.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 3
+    target:
+      choosen_dtype:
+        anchor: Tensor
+        eps: float
+        margin: float
+        negative: Tensor
+        p: float
+        positive: Tensor
+        reduce: Optional[bool]
+        reduction: str
+        size_average: Optional[bool]
+        swap: bool
+      msg: Too large tensor shape
+      package: torch
+    txt: anchor.rank <= 7 and positive.rank <= 7 and negative.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

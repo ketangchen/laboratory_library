@@ -1,0 +1,64 @@
+args:
+  dtype:
+  - str
+  - bfloat16,float16,float32,float64,complex64,complex128
+  is_pos:
+  - false
+  - false
+  name:
+  - name
+  - x
+  required:
+  - false
+  - true
+name: tf.cos
+package: tensorflow
+pass_rate: 100
+rules:
+- - cot: 'The error occurs because the attribute ''T'' of the tensor ''x'' is of type
+      int32, which is not in the list of allowed types: bfloat16, half, float, double,
+      complex64, complex128.  To correct this, the data type of ''x'' needs to be
+      changed to match one of the allowed types. So, the Left : dtype(x) should be
+      corrected to be either bfloat16, half, float, double, complex64, complex128.
+      Op : in, and Right : [bfloat16, half, float, double, complex64, complex128].'
+    length: 1
+    target:
+      choosen_dtype:
+        name: str
+        x: tensor
+      msg: "Value for attr 'T' of int32 is not in the list of allowed values: bfloat16,\
+        \ half, float, double, complex64, complex128\n\t; NodeDef: {{node Cos}}; Op<name=Cos;\
+        \ signature=x:T -> y:T; attr=T:type,allowed=[DT_BFLOAT16, DT_HALF, DT_FLOAT,\
+        \ DT_DOUBLE, DT_COMPLEX64, DT_COMPLEX128]> [Op:Cos] name: ajEx"
+      package: tensorflow
+    txt: dtype(x) in ["bfloat16", "half", "float", "double", "complex64", "complex128"]
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        name: str
+        x: bfloat16,float16,float32,float64,complex64,complex128
+      msg: negative dimensions are not allowed
+      package: tensorflow
+    txt: all(i >= 0 for i in x.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        name: str
+        x: bfloat16,float16,float32,float64,complex64,complex128
+      msg: Too large tensor shape
+      package: tensorflow
+    txt: x.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

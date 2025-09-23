@@ -1,0 +1,71 @@
+args:
+  dtype:
+  - Tensor
+  - Tensor
+  is_pos:
+  - true
+  - false
+  name:
+  - self
+  - other
+  required:
+  - true
+  - true
+name: torch.Tensor.bitwise_xor
+package: torch
+pass_rate: 97.6
+rules:
+- - cot: synthesized
+    target:
+      choosen_dtype:
+        other: tensor
+        self: tensor
+      msg: The size of tensor a (6) must match the size of tensor b (7) at non-singleton
+        dimension 2
+      package: torch
+    txt: (self.dim() == other.dim()) or (self.shape[2] == other.shape[2])
+  - f1_score: 34.55056179775281
+    overall_score: 13.558823529411764
+    precision: 24.11764705882353
+    recall: 60.89108910891089
+- - cot: The error is caused by the fact that the function `torch.Tensor.bitwise_xor`
+      is not implemented for floating-point tensors. Therefore, to prevent the error,
+      the constraint should ensure that both `self` and `other` tensors have a data
+      type other than float.
+    target:
+      choosen_dtype:
+        other: tensor
+        self: tensor
+      msg: '"bitwise_xor_cpu" not implemented for ''Float'''
+      package: torch
+    txt: dtype(self) != "float" and dtype(other) != "float"
+  - f1_score: 71.67955024595925
+    overall_score: 100
+    precision: 100.0
+    recall: 55.85980284775466
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        other: Tensor
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape) and all(i >= 0 for i in other.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        other: Tensor
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7 and other.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

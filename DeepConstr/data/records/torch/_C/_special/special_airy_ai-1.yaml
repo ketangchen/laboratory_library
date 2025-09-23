@@ -1,0 +1,89 @@
+args:
+  dtype:
+  - Tensor
+  - Tensor
+  is_pos:
+  - false
+  - false
+  name:
+  - x
+  - out
+  required:
+  - true
+  - true
+name: torch._C._special.special_airy_ai
+package: torch
+pass_rate: 100
+rules:
+- - cot: divided
+    length: 1
+    target:
+      choosen_dtype:
+        out: tensor
+        x: tensor
+      msg: '"airy_ai_cpu" not implemented for ''Half'''
+      package: torch
+    txt: dtype(x) != "half"
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: 'The error is triggered because the output tensor is of type Int, while the
+      function is returning a Float. Let''s look at the arguments. The ''out'' tensor''s
+      dtype is Int32, while the ''x'' tensor''s dtype is Float32. Therefore, the dtype
+      of the output tensor should match the dtype of the result. Left : dtype(out),
+      Op : ==, Right : float'
+    length: 1
+    target:
+      choosen_dtype:
+        out: tensor
+        x: tensor
+      msg: result type Float can't be cast to the desired output type Int
+      package: torch
+    txt: dtype(out) == float
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: 'The error is occurring because the ''out'' tensor is being resized but it
+      is not resizable. The ''out'' tensor needs to be the same size as the input
+      tensor ''x'' for the function to execute properly. Therefore, Left: out.shape,
+      out.rank, Op: ''=='', Right: x.shape, x.rank.'
+    length: 1
+    target:
+      choosen_dtype:
+        out: tensor
+        x: tensor
+      msg: Trying to resize storage that is not resizable
+      package: torch
+    txt: out.rank==x.rank and all(out.shape[i]==x.shape[i] for i in range(out.rank))
+  - f1_score: 74.21150278293136
+    overall_score: 49.10575139146568
+    precision: 100.0
+    recall: 58.99705014749264
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        out: Tensor
+        x: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in x.shape) and all(i >= 0 for i in out.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        out: Tensor
+        x: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: x.rank <= 7 and out.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

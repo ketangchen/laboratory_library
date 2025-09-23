@@ -1,0 +1,74 @@
+args:
+  dtype:
+  - Tensor
+  - Optional[List[int]]
+  - bool
+  - None
+  is_pos:
+  - true
+  - false
+  - false
+  - false
+  name:
+  - self
+  - dim
+  - keepdim
+  - dtype
+  required:
+  - true
+  - false
+  - false
+  - false
+name: torch.mean
+package: torch
+pass_rate: 100
+rules:
+- - cot: The error is triggered because the input dtype is Int, which is not a valid
+      dtype for the mean operation. The output dtype of the mean operation must be
+      either a floating point or complex dtype. To prevent the error, the input dtype
+      should be changed to a valid dtype for the mean operation.
+    length: 1
+    target:
+      choosen_dtype:
+        dim: None
+        dtype: None
+        keepdim: bool
+        self: tensor
+      msg: 'mean(): could not infer output dtype. Input dtype must be either a floating
+        point or complex dtype. Got: Int'
+      package: torch
+    txt: dtype(self) in [float16, float32, float64, complex64, complex128]
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        dim: Optional[List[int]]
+        dtype: None
+        keepdim: bool
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        dim: Optional[List[int]]
+        dtype: None
+        keepdim: bool
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

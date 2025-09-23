@@ -1,0 +1,91 @@
+args:
+  dtype:
+  - Tensor
+  - int
+  - int
+  is_pos:
+  - true
+  - false
+  - false
+  name:
+  - self
+  - chunks
+  - dim
+  required:
+  - true
+  - true
+  - false
+name: torch.Tensor.chunk
+package: torch
+pass_rate: 100
+rules:
+- - cot: divided
+    target:
+      choosen_dtype:
+        chunks: int
+        dim: int
+        self: tensor
+      msg: Dimension out of range (expected to be in range of [-1, 0], but got 80)
+      package: torch
+    txt: dim < len(self.shape)
+  - f1_score: 66.66666666666667
+    overall_score: 100
+    precision: 100.0
+    recall: 50.0
+- - cot: 'The error is due to the invalid ''chunks'' value. The ''chunks'' parameter
+      in torch.Tensor.chunk should be greater than 0, but it is currently 0. Therefore,
+      ''chunks'' should be corrected to a value greater than 0. The condition that
+      prevents the error is:'
+    target:
+      choosen_dtype:
+        chunks: int
+        dim: int
+        self: tensor
+      msg: 'chunk expects `chunks` to be greater than 0, got: 0'
+      package: torch
+    txt: chunks > 0
+  - f1_score: 96.40831758034027
+    overall_score: 100
+    precision: 100.0
+    recall: 93.06569343065694
+- - cot: ''
+    target:
+      choosen_dtype:
+        chunks: int
+        dim: int
+        self: tensor
+      msg: chunk expects at least a 1-dimensional tensor
+      package: torch
+    txt: self.dim() >= 1
+  - f1_score: 98.68073878627968
+    overall_score: 100
+    precision: 100.0
+    recall: 97.39583333333333
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        chunks: int
+        dim: int
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        chunks: int
+        dim: int
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

@@ -1,0 +1,64 @@
+args:
+  dtype:
+  - str
+  - bfloat16,float16,float32,float64,complex64,complex128
+  is_pos:
+  - false
+  - false
+  name:
+  - name
+  - x
+  required:
+  - false
+  - true
+name: tf.tan
+package: tensorflow
+pass_rate: 100
+rules:
+- - cot: "Based on the given runtime information, the error occurs because the attribute\
+      \ 'x' is expected to have one of the allowed types ['bfloat16', 'half', 'float',\
+      \ 'double', 'complex64', 'complex128']. However, the provided value for 'x'\
+      \ is int32, which is not compatible.\n\nTo prevent this error, the dtype(x)\
+      \ should be corrected to match one of the allowed types. \n\nThe constraint\
+      \ that prevents the error is:"
+    length: 1
+    target:
+      choosen_dtype:
+        name: str
+        x: tensor
+      msg: "Value for attr 'T' of int32 is not in the list of allowed values: bfloat16,\
+        \ half, float, double, complex64, complex128\n\t; NodeDef: {{node Tan}}; Op<name=Tan;\
+        \ signature=x:T -> y:T; attr=T:type,allowed=[DT_BFLOAT16, DT_HALF, DT_FLOAT,\
+        \ DT_DOUBLE, DT_COMPLEX64, DT_COMPLEX128]> [Op:Tan] name: WdYU"
+      package: tensorflow
+    txt: dtype(x) in ['bfloat16', 'half', 'float', 'double', 'complex64', 'complex128']
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        name: str
+        x: bfloat16,float16,float32,float64,complex64,complex128
+      msg: negative dimensions are not allowed
+      package: tensorflow
+    txt: all(i >= 0 for i in x.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        name: str
+        x: bfloat16,float16,float32,float64,complex64,complex128
+      msg: Too large tensor shape
+      package: tensorflow
+    txt: x.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

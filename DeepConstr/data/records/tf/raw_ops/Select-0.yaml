@@ -1,0 +1,91 @@
+args:
+  dtype:
+  - float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool,bool
+  - str
+  - float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+  - float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+  is_pos:
+  - false
+  - false
+  - false
+  - false
+  name:
+  - condition
+  - name
+  - x
+  - y
+  required:
+  - true
+  - false
+  - true
+  - true
+name: tf.raw_ops.Select
+package: tensorflow
+pass_rate: 24.0
+rules:
+- - cot: "The error is triggered because the size and shape of input tensors are not\
+      \ the same. To prevent this error, we need to ensure that the size and shape\
+      \ of the tensors are the same. \n\nThe constraint that prevents the error is:"
+    length: 1
+    target:
+      choosen_dtype:
+        condition: tensor
+        name: str
+        x: tensor
+        y: tensor
+      msg: '{{function_node __wrapped__Select_device_/job:localhost/replica:0/task:0/device:CPU:0}}
+        Inputs to operation Select of type Select must have the same size and shape.  Input
+        0: [9,9,9,9] != input 1: [6,6,6,6,6,6,6] [Op:Select] name: pxJo'
+      package: tensorflow
+    txt: condition.shape == x.shape and condition.shape == y.shape
+  - f1_score: 38.29422731318968
+    overall_score: 31.14711365659484
+    precision: 25.418060200668897
+    recall: 77.60909524133706
+- - cot: synthesized
+    length: 2
+    target:
+      choosen_dtype:
+        condition: tensor
+        name: str
+        x: tensor
+        y: tensor
+      msg: 'cannot compute Select as input #0(zero-based) was expected to be a bool
+        tensor but is a float tensor [Op:Select] name: LGCF'
+      package: tensorflow
+    txt: (condition.dtype == bool) and (dtype(y) == dtype(x))
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 3
+    target:
+      choosen_dtype:
+        condition: float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool,bool
+        name: str
+        x: float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+        y: float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+      msg: negative dimensions are not allowed
+      package: tensorflow
+    txt: all(i >= 0 for i in condition.shape) and all(i >= 0 for i in x.shape) and
+      all(i >= 0 for i in y.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 3
+    target:
+      choosen_dtype:
+        condition: float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool,bool
+        name: str
+        x: float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+        y: float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+      msg: Too large tensor shape
+      package: tensorflow
+    txt: condition.rank <= 7 and x.rank <= 7 and y.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

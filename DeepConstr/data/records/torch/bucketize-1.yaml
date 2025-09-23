@@ -1,0 +1,73 @@
+args:
+  dtype:
+  - number
+  - Tensor
+  - bool
+  - bool
+  is_pos:
+  - true
+  - false
+  - false
+  - false
+  name:
+  - self
+  - boundaries
+  - out_int32
+  - right
+  required:
+  - true
+  - true
+  - false
+  - false
+name: torch.bucketize
+package: torch
+pass_rate: 100
+rules:
+- - cot: 'Error is triggered because the boundaries tensor is expected to be 1-dimensional,
+      but it has dimension 7. Let''s see what the args were. The dimensions and shape
+      of the boundaries tensor should be corrected. Therefore, Left : boundaries.dim,
+      Op : ==, and Right : 1.'
+    length: 1
+    target:
+      choosen_dtype:
+        boundaries: tensor
+        out_int32: bool
+        right: bool
+        self: int
+      msg: boundaries tensor must be 1 dimension, but got dim(2)
+      package: torch
+    txt: boundaries.dim == 1
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        boundaries: Tensor
+        out_int32: bool
+        right: bool
+        self: number
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in boundaries.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        boundaries: Tensor
+        out_int32: bool
+        right: bool
+        self: number
+      msg: Too large tensor shape
+      package: torch
+    txt: boundaries.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

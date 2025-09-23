@@ -1,0 +1,91 @@
+args:
+  dtype:
+  - Tensor
+  - int
+  is_pos:
+  - true
+  - false
+  name:
+  - self
+  - sections
+  required:
+  - true
+  - true
+name: torch.Tensor.dsplit
+package: torch
+pass_rate: 74.0
+rules:
+- - cot: 'The error is triggered because the input tensor has only 2 dimensions, but
+      `torch.dsplit` requires a tensor with at least 3 dimensions. To prevent the
+      error, we need to ensure that the tensor has at least 3 dimensions. Therefore,
+      the constraint can be formulated as:'
+    length: 1
+    target:
+      choosen_dtype:
+        sections: int
+        self: tensor
+      msg: torch.dsplit requires a tensor with at least 3 dimension, but got a tensor
+        with 2 dimensions!
+      package: torch
+    txt: self.dim() >= 3
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: synthesized
+    length: 2
+    target:
+      choosen_dtype:
+        sections: int
+        self: tensor
+      msg: torch.dsplit attempted to split along dimension 2, but the size of the
+        dimension 4 is not divisible by the split_size 22!
+      package: torch
+    txt: (sections % self.shape[2] == 0) or (self.shape[2] % sections == 0)
+  - f1_score: 35.02454991816693
+    overall_score: 12.2
+    precision: 21.4
+    recall: 96.39639639639638
+- - cot: 'The error is triggered because the number of sections provided is not larger
+      than 0. The given runtime information shows that sections=-1, which violates
+      this condition. To prevent this error, we need to ensure that the number of
+      sections is always larger than 0. The constraint for the ''sections'' parameter
+      can be expressed as:'
+    length: 1
+    target:
+      choosen_dtype:
+        sections: int
+        self: tensor
+      msg: number of sections must be larger than 0, got -1
+      package: torch
+    txt: sections > 0
+  - f1_score: 80.77544426494346
+    overall_score: 100
+    precision: 100.0
+    recall: 67.75067750677508
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        sections: int
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        sections: int
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

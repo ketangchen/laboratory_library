@@ -1,0 +1,80 @@
+args:
+  dtype:
+  - int
+  - bool
+  - str
+  - bool
+  - float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+  is_pos:
+  - false
+  - false
+  - false
+  - false
+  - false
+  name:
+  - axis
+  - exclusive
+  - name
+  - reverse
+  - x
+  required:
+  - true
+  - false
+  - false
+  - false
+  - true
+name: tf.raw_ops.Cumprod
+package: tensorflow
+pass_rate: 99.33333333333333
+rules:
+- - cot: synthesized
+    length: 5
+    target:
+      choosen_dtype:
+        axis: int
+        exclusive: bool
+        name: str
+        reverse: bool
+        x: tensor
+      msg: '{{function_node __wrapped__Cumprod_device_/job:localhost/replica:0/task:0/device:CPU:0}}
+        ScanOp: Expected scan axis in the range [-2, 2), but got 59 [Op:Cumprod] name:
+        oKeu'
+      package: tensorflow
+    txt: ((((axis >= -len(x.shape))) and (9 >= -len(x.shape))) and (axis == 0)) or
+      ((-len(x.shape) <= axis < len(x.shape)) and (-2 <= axis < 2))
+  - f1_score: 83.9506172839506
+    overall_score: 53.9753086419753
+    precision: 90.66666666666666
+    recall: 78.16091954022988
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        axis: int
+        exclusive: bool
+        name: str
+        reverse: bool
+        x: float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+      msg: negative dimensions are not allowed
+      package: tensorflow
+    txt: all(i >= 0 for i in x.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        axis: int
+        exclusive: bool
+        name: str
+        reverse: bool
+        x: float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+      msg: Too large tensor shape
+      package: tensorflow
+    txt: x.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

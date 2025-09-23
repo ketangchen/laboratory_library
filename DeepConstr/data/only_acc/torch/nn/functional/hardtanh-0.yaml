@@ -1,0 +1,55 @@
+args:
+  dtype:
+  - Tensor
+  - float
+  - float
+  - bool
+  is_pos:
+  - false
+  - false
+  - false
+  - false
+  name:
+  - input
+  - min_val
+  - max_val
+  - inplace
+  required:
+  - true
+  - false
+  - false
+  - false
+name: torch.nn.functional.hardtanh
+package: torch
+pass_rate: 100
+rules:
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        inplace: bool
+        input: Tensor
+        max_val: float
+        min_val: float
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in input.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        inplace: bool
+        input: Tensor
+        max_val: float
+        min_val: float
+      msg: Too large tensor shape
+      package: torch
+    txt: input.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

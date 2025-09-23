@@ -1,0 +1,123 @@
+args:
+  dtype:
+  - Tensor
+  - Tensor
+  - number
+  - Tensor
+  is_pos:
+  - true
+  - false
+  - false
+  - false
+  name:
+  - self
+  - other
+  - alpha
+  - out
+  required:
+  - true
+  - true
+  - false
+  - true
+name: torch.sub
+package: torch
+pass_rate: 100
+rules:
+- - cot: ''
+    length: 1
+    target:
+      choosen_dtype:
+        alpha: int
+        other: tensor
+        out: tensor
+        self: tensor
+      msg: result type Float can't be cast to the desired output type Int
+      package: torch
+    txt: dtype(self) == dtype(other) == dtype(out) == float32
+  - f1_score: 95.14563106796116
+    overall_score: 53.57281553398058
+    precision: 98.0
+    recall: 92.45283018867923
+- - cot: synthesized
+    length: 3
+    target:
+      choosen_dtype:
+        alpha: int
+        other: tensor
+        out: tensor
+        self: tensor
+      msg: Trying to resize storage that is not resizable
+      package: torch
+    txt: ((out.rank == self.rank and all(out.shape[i] == self.shape[i] for i in range(out.rank)))
+      or (out.shape == other.shape)) and (out.rank == other.rank)
+  - f1_score: 67.37651677949945
+    overall_score: 45.68825838974973
+    precision: 97.2027972027972
+    recall: 51.55658861056849
+- - cot: synthesized
+    length: 2
+    target:
+      choosen_dtype:
+        alpha: int
+        other: tensor
+        out: tensor
+        self: tensor
+      msg: Trying to resize storage that is not resizable
+      package: torch
+    txt: (all(out.shape[i]==self.shape[i] for i in range(out.rank))) and (all(out.shape[i]==self.shape[i]
+      for i in range(self.rank)))
+  - f1_score: 60.65808297567955
+    overall_score: 36.833333333333336
+    precision: 70.66666666666667
+    recall: 53.1328320802005
+- - cot: "The error is triggered because the size of tensor a (9) does not match the\
+      \ size of tensor b (8) at non-singleton dimension 0. To prevent this error,\
+      \ we can add a constraint that ensures the dimensions and shape of the input\
+      \ tensors are consistent. \n\nTherefore, the constraint can be formulated as\
+      \ follows:"
+    length: 1
+    target:
+      choosen_dtype:
+        alpha: int
+        other: tensor
+        out: tensor
+        self: tensor
+      msg: The size of tensor a (8) must match the size of tensor b (4) at non-singleton
+        dimension 2
+      package: torch
+    txt: self.dim == other.dim and self.shape == other.shape
+  - f1_score: 71.875
+    overall_score: 47.9375
+    precision: 99.66666666666667
+    recall: 56.20300751879699
+- - cot: default
+    length: 3
+    target:
+      choosen_dtype:
+        alpha: number
+        other: Tensor
+        out: Tensor
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape) and all(i >= 0 for i in other.shape) and
+      all(i >= 0 for i in out.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 3
+    target:
+      choosen_dtype:
+        alpha: number
+        other: Tensor
+        out: Tensor
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7 and other.rank <= 7 and out.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

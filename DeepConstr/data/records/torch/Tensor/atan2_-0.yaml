@@ -1,0 +1,103 @@
+args:
+  dtype:
+  - Tensor
+  - Tensor
+  is_pos:
+  - true
+  - false
+  name:
+  - self
+  - other
+  required:
+  - true
+  - true
+name: torch.Tensor.atan2_
+package: torch
+pass_rate: 100
+rules:
+- - cot: ''
+    length: 1
+    target:
+      choosen_dtype:
+        other: tensor
+        self: tensor
+      msg: The size of tensor a (9) must match the size of tensor b (8) at non-singleton
+        dimension 5
+      package: torch
+    txt: self.shape[5] == other.shape[5]
+  - f1_score: 68.82312456985545
+    overall_score: 100
+    precision: 100.0
+    recall: 52.46589716684154
+- - cot: 'Based on the given runtime information, the error occurs because the shape
+      of the `other` tensor is too large compared to the shape of the `self` tensor.
+      To prevent this error, the shape of the `other` tensor should be adjusted to
+      match the shape of the `self` tensor.
+
+
+      Therefore, the constraint that should be applied is:'
+    length: 1
+    target:
+      choosen_dtype:
+        other: tensor
+        self: tensor
+      msg: 'Too large tensor shape: shape = [6, 9, 9, 9, 9, 9, 9, 9, 9]'
+      package: torch
+    txt: other.shape == self.shape
+  - f1_score: 67.75067750677506
+    overall_score: 45.87533875338753
+    precision: 100.0
+    recall: 51.229508196721305
+- - cot: divided
+    length: 1
+    target:
+      choosen_dtype:
+        other: tensor
+        self: tensor
+      msg: output with shape [3, 5, 1, 5, 5, 5] doesn't match the broadcast shape
+        [3, 5, 3, 5, 5, 5]
+      package: torch
+    txt: self.dim() == other.dim()
+  - f1_score: 67.1591672263264
+    overall_score: 100
+    precision: 100.0
+    recall: 50.55611729019211
+- - cot: synthesized
+    length: 2
+    target:
+      choosen_dtype:
+        other: tensor
+        self: tensor
+      msg: result type Float can't be cast to the desired output type Int
+      package: torch
+    txt: (dtype(self) == dtype(other)) and (dtype(other) == Float)
+  - f1_score: 95.92039800995023
+    overall_score: 59.96019900497512
+    precision: 96.39999999999999
+    recall: 95.44554455445544
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        other: Tensor
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape) and all(i >= 0 for i in other.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        other: Tensor
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7 and other.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

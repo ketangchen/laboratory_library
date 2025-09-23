@@ -1,0 +1,93 @@
+args:
+  dtype:
+  - Tensor
+  - Optional[int]
+  - bool
+  is_pos:
+  - true
+  - false
+  - false
+  name:
+  - self
+  - dim
+  - keepdim
+  required:
+  - true
+  - false
+  - false
+name: torch.Tensor.argmin
+package: torch
+pass_rate: 100
+rules:
+- - cot: synthesized
+    target:
+      choosen_dtype:
+        dim: int
+        keepdim: bool
+        self: tensor
+      msg: Dimension out of range (expected to be in range of [-1, 0], but got 5)
+      package: torch
+    txt: (dim >= -len(self.shape)) and (dim <= 0)
+  - f1_score: 94.33962264150942
+    overall_score: 100
+    precision: 100.0
+    recall: 89.28571428571428
+- - cot: The error occurs because the input tensor has zero elements (input.numel()
+      == 0) and the reduction dimension is not specified. To prevent this error, the
+      reduction dimension should be specified for input tensors with zero elements.
+    target:
+      choosen_dtype:
+        dim: None
+        keepdim: bool
+        self: tensor
+      msg: 'argmin(): Expected reduction dim to be specified for input.numel() ==
+        0.'
+      package: torch
+    txt: (keepdim == True)
+  - f1_score: 66.66666666666667
+    overall_score: 100
+    precision: 100.0
+    recall: 50.0
+- - cot: ''
+    target:
+      choosen_dtype:
+        dim: int
+        keepdim: bool
+        self: tensor
+      msg: 'argmin(): Expected reduction dim 0 to have non-zero size.'
+      package: torch
+    txt: 'self.shape[dim] > 0
+
+      '
+  - f1_score: 99.7840172786177
+    overall_score: 54.89200863930885
+    precision: 100.0
+    recall: 99.56896551724138
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        dim: Optional[int]
+        keepdim: bool
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        dim: Optional[int]
+        keepdim: bool
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

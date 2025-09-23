@@ -1,0 +1,60 @@
+args:
+  dtype:
+  - Tensor
+  - float
+  is_pos:
+  - true
+  - false
+  name:
+  - self
+  - rcond
+  required:
+  - true
+  - false
+name: torch.pinverse
+package: torch
+pass_rate: 100
+rules:
+- - cot: 'The error message states that the function `torch.pinverse` expects a tensor
+      with 2 or more dimensions of float, double, cfloat, or cdouble types. However,
+      the input tensor `self` is provided as `Tensor<f32>[]`, which is an empty tensor
+      of float32 type. To prevent this error, the following constraint can be formulated:'
+    length: 1
+    target:
+      choosen_dtype:
+        rcond: float
+        self: tensor
+      msg: 'linalg.pinv(Float{[]}): expected a tensor with 2 or more dimensions of
+        float, double, cfloat or cdouble types'
+      package: torch
+    txt: self.rank >= 2 and dtype(self) in ["float32", "float64", "complex64", "complex128"]
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        rcond: float
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        rcond: float
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

@@ -1,0 +1,94 @@
+args:
+  dtype:
+  - Tensor
+  - int
+  - int
+  is_pos:
+  - true
+  - false
+  - false
+  name:
+  - self
+  - start_dim
+  - end_dim
+  required:
+  - true
+  - false
+  - false
+name: torch.Tensor.flatten
+package: torch
+pass_rate: 21.2
+rules:
+- - cot: divided
+    length: 1
+    target:
+      choosen_dtype:
+        end_dim: int
+        self: tensor
+        start_dim: int
+      msg: 'Too large tensor shape: shape = [9, 9, 9, 9, 9, 9, 9, 9, 9]'
+      package: torch
+    txt: start_dim != end_dim
+  - f1_score: 68.39945280437756
+    overall_score: 46.19972640218878
+    precision: 100.0
+    recall: 51.975051975051976
+- - cot: 'The error message suggests that the `start_dim` argument cannot come after
+      the `end_dim` argument in the `torch.Tensor.flatten` function. To prevent this
+      error, we need to ensure that `start_dim` is less than or equal to `end_dim`.
+      Therefore, the constraint that prevents the error is:'
+    length: 1
+    target:
+      choosen_dtype:
+        end_dim: int
+        self: tensor
+        start_dim: int
+      msg: 'flatten() has invalid args: start_dim cannot come after end_dim'
+      package: torch
+    txt: (start_dim <= end_dim)
+  - f1_score: 91.90207156308851
+    overall_score: 57.951035781544256
+    precision: 97.6
+    recall: 86.83274021352314
+- - cot: divided
+    length: 1
+    target:
+      choosen_dtype:
+        end_dim: int
+        self: tensor
+        start_dim: int
+      msg: Dimension out of range (expected to be in range of [-4, 3], but got 9)
+      package: torch
+    txt: end_dim >= -len(self.shape)
+  - f1_score: 94.99489274770173
+    overall_score: 59.49744637385086
+    precision: 93.0
+    recall: 97.07724425887265
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        end_dim: int
+        self: Tensor
+        start_dim: int
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        end_dim: int
+        self: Tensor
+        start_dim: int
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

@@ -1,0 +1,66 @@
+args:
+  dtype:
+  - Tensor
+  - Tensor
+  - number
+  is_pos:
+  - true
+  - false
+  - false
+  name:
+  - self
+  - other
+  - alpha
+  required:
+  - true
+  - true
+  - false
+name: torch.subtract
+package: torch
+pass_rate: 100
+rules:
+- - cot: 'Error is triggered because the size of tensor a (2) does not match the size
+      of tensor b (6) at non-singleton dimension 3. To prevent this error, we can
+      formulate the following constraint:'
+    length: 1
+    target:
+      choosen_dtype:
+        alpha: int
+        other: tensor
+        self: tensor
+      msg: The size of tensor a (3) must match the size of tensor b (7) at non-singleton
+        dimension 4
+      package: torch
+    txt: self.shape[3] == other.shape[3]
+  - f1_score: 76.04562737642586
+    overall_score: 100
+    precision: 100.0
+    recall: 61.34969325153374
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        alpha: number
+        other: Tensor
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape) and all(i >= 0 for i in other.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        alpha: number
+        other: Tensor
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7 and other.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

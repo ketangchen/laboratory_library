@@ -1,0 +1,57 @@
+args:
+  dtype:
+  - float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+  - str
+  is_pos:
+  - false
+  - false
+  name:
+  - inputs
+  - name
+  required:
+  - true
+  - false
+name: tf.raw_ops.AddN
+package: tensorflow
+pass_rate: 100
+rules:
+- - cot: ''
+    length: 1
+    target:
+      choosen_dtype:
+        inputs: tensor
+        name: str
+      msg: 'Expected list for ''inputs'' argument to ''add_n'' Op, not <tf.Tensor:
+        shape=(), dtype=float32, numpy=350280.44>.'
+      package: tensorflow
+    txt: len(inputs) > 0
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        inputs: float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+        name: str
+      msg: negative dimensions are not allowed
+      package: tensorflow
+    txt: all(i >= 0 for i in inputs.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        inputs: float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+        name: str
+      msg: Too large tensor shape
+      package: tensorflow
+    txt: inputs.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

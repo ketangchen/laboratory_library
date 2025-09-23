@@ -1,0 +1,95 @@
+args:
+  dtype:
+  - Tensor
+  - Tensor
+  - Tensor
+  - number
+  - number
+  is_pos:
+  - true
+  - false
+  - false
+  - false
+  - false
+  name:
+  - self
+  - vec1
+  - vec2
+  - beta
+  - alpha
+  required:
+  - true
+  - true
+  - true
+  - false
+  - false
+name: torch.addr
+package: torch
+pass_rate: 100
+rules:
+- - cot: synthesized
+    length: 2
+    target:
+      choosen_dtype:
+        alpha: int
+        beta: int
+        self: tensor
+        vec1: tensor
+        vec2: tensor
+      msg: 'The expanded size of the tensor (3) must match the existing size (6) at
+        non-singleton dimension 1.  Target sizes: [8, 3].  Tensor sizes: [6, 6]'
+      package: torch
+    txt: (self.shape[1] == 9) and (len(vec1) == self.shape[0] and len(vec2) == self.shape[1])
+  - f1_score: 85.47008547008546
+    overall_score: 48.73504273504273
+    precision: 100.0
+    recall: 74.62686567164178
+- - cot: synthesized
+    length: 2
+    target:
+      choosen_dtype:
+        alpha: int
+        beta: int
+        self: tensor
+        vec1: tensor
+        vec2: tensor
+      msg: 'addr: Expected 1-D argument vec1, but got 7-D'
+      package: torch
+    txt: (vec1.dim() == 1) and (vec2.ndims() == 1)
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 3
+    target:
+      choosen_dtype:
+        alpha: number
+        beta: number
+        self: Tensor
+        vec1: Tensor
+        vec2: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape) and all(i >= 0 for i in vec1.shape) and all(i
+      >= 0 for i in vec2.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 3
+    target:
+      choosen_dtype:
+        alpha: number
+        beta: number
+        self: Tensor
+        vec1: Tensor
+        vec2: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7 and vec1.rank <= 7 and vec2.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

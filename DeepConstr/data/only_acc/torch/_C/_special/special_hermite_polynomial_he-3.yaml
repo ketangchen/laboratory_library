@@ -1,0 +1,58 @@
+args:
+  dtype:
+  - number
+  - Tensor
+  is_pos:
+  - false
+  - false
+  name:
+  - x
+  - n
+  required:
+  - true
+  - true
+name: torch._C._special.special_hermite_polynomial_he
+package: torch
+pass_rate: 93.35664335664336
+rules:
+- - cot: Based on the given runtime information, the error is triggered because the
+      result type Float cannot be cast to the desired output type Int. To prevent
+      this error, the dtypes of the input and output tensors should be consistent.
+    length: 1
+    target:
+      choosen_dtype:
+        n: tensor
+        x: int
+      msg: result type Float can't be cast to the desired output type Int
+      package: torch
+    txt: dtype(out) == dtype(n)
+  - f1_score: 92.93924466338261
+    overall_score: 50.16666666666667
+    precision: 94.33333333333334
+    recall: 91.58576051779936
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        n: Tensor
+        x: number
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in n.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        n: Tensor
+        x: number
+      msg: Too large tensor shape
+      package: torch
+    txt: n.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

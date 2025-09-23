@@ -1,0 +1,51 @@
+args:
+  dtype:
+  - Tensor
+  is_pos:
+  - true
+  name:
+  - self
+  required:
+  - true
+name: torch.Tensor.det
+package: torch
+pass_rate: 27.450980392156865
+rules:
+- - cot: 'Error is triggered because the input tensor A has less than 2 dimensions.
+      To prevent the error, we can add a constraint to check if the number of dimensions
+      of the input tensor A is at least 2. Therefore, the constraint can be formulated
+      as:'
+    target:
+      choosen_dtype:
+        self: tensor
+      msg: 'linalg.det: The input tensor A must have at least 2 dimensions.'
+      package: torch
+    txt: self.dim() >= 2
+  - f1_score: 99.02912621359224
+    overall_score: 100
+    precision: 100.0
+    recall: 98.07692307692308
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

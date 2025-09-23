@@ -1,0 +1,52 @@
+args:
+  dtype:
+  - Tensor
+  is_pos:
+  - true
+  name:
+  - self
+  required:
+  - true
+name: torch.Tensor.trace
+package: torch
+pass_rate: 100
+rules:
+- - cot: 'The error is due to the fact that the input tensor has a dimension of 7,
+      but the `torch.Tensor.trace` function expects a matrix. To prevent this error,
+      we need to ensure that the input tensor has exactly two dimensions. So, the
+      constraint is:'
+    length: 1
+    target:
+      choosen_dtype:
+        self: tensor
+      msg: 'trace: expected a matrix, but got tensor with dim 7'
+      package: torch
+    txt: self.dim == 2
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

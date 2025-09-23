@@ -1,0 +1,63 @@
+args:
+  dtype:
+  - float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+  - str
+  is_pos:
+  - false
+  - false
+  name:
+  - features
+  - name
+  required:
+  - true
+  - false
+name: tf.raw_ops.Elu
+package: tensorflow
+pass_rate: 100
+rules:
+- - cot: "Based on the given runtime information, the error occurs because the attribute\
+      \ 'features' is of type int32, but it is expected to be one of the allowed types:\
+      \ half, bfloat16, float, double. To prevent the error, the attribute 'features'\
+      \ should be of one of the allowed types. \n\nThe constraint can be formulated\
+      \ as:"
+    length: 1
+    target:
+      choosen_dtype:
+        features: tensor
+        name: str
+      msg: "Value for attr 'T' of int32 is not in the list of allowed values: half,\
+        \ bfloat16, float, double\n\t; NodeDef: {{node Elu}}; Op<name=Elu; signature=features:T\
+        \ -> activations:T; attr=T:type,allowed=[DT_HALF, DT_BFLOAT16, DT_FLOAT, DT_DOUBLE]>\
+        \ [Op:Elu] name: MADF"
+      package: tensorflow
+    txt: dtype(features) in ["half", "bfloat16", "float", "double"]
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        features: float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+        name: str
+      msg: negative dimensions are not allowed
+      package: tensorflow
+    txt: all(i >= 0 for i in features.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        features: float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+        name: str
+      msg: Too large tensor shape
+      package: tensorflow
+    txt: features.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

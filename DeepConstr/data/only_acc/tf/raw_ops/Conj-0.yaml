@@ -1,0 +1,62 @@
+args:
+  dtype:
+  - float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+  - str
+  is_pos:
+  - false
+  - false
+  name:
+  - input
+  - name
+  required:
+  - true
+  - false
+name: tf.raw_ops.Conj
+package: tensorflow
+pass_rate: 100
+rules:
+- - cot: 'The error is arising because the attribute ''T'' is a float, but it is expected
+      to be either complex64, complex128. The tensor ''input'' is provided as float32,
+      which is not compatible. So, dtype(input) should be corrected to match one of
+      the allowed types. Op : in, and Right : [complex64, complex128].'
+    length: 1
+    target:
+      choosen_dtype:
+        input: tensor
+        name: str
+      msg: "Value for attr 'T' of float is not in the list of allowed values: complex64,\
+        \ complex128, variant\n\t; NodeDef: {{node Conj}}; Op<name=Conj; signature=input:T\
+        \ -> output:T; attr=T:type,default=DT_COMPLEX64,allowed=[DT_COMPLEX64, DT_COMPLEX128,\
+        \ DT_VARIANT]> [Op:Conj] name: asRl"
+      package: tensorflow
+    txt: dtype(input) in ["complex64", "complex128"]
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        input: float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+        name: str
+      msg: negative dimensions are not allowed
+      package: tensorflow
+    txt: all(i >= 0 for i in input.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        input: float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+        name: str
+      msg: Too large tensor shape
+      package: tensorflow
+    txt: input.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

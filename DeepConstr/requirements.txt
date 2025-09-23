@@ -1,0 +1,15 @@
+z3-solver
+hydra-core>=1.1.0
+hydra_colorlog
+multipledispatch
+appdirs
+numpy
+pre-commit
+numpy
+rich
+tqdm
+matplotlib
+python-dotenv
+openai
+scikit-learn
+pandas

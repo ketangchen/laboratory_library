@@ -1,0 +1,62 @@
+args:
+  dtype:
+  - Tensor
+  - number
+  is_pos:
+  - true
+  - false
+  name:
+  - self
+  - other
+  required:
+  - true
+  - true
+name: torch.bitwise_and
+package: torch
+pass_rate: 96.33333333333334
+rules:
+- - cot: "The error is due to the fact that the bitwise_and function is not implemented\
+      \ for 'Float' data type. The runtime information shows that the input tensor\
+      \ has a data type of 'Float' (Tensor<f32>). To prevent this error, the data\
+      \ type of the input tensor should be one of the allowed types for bitwise_and,\
+      \ which are 'half', 'int16', 'int32', 'int64', 'uint8', 'uint16', 'uint32',\
+      \ 'uint64'. \n\nThe constraint to prevent the error is:"
+    length: 1
+    target:
+      choosen_dtype:
+        other: int
+        self: tensor
+      msg: '"bitwise_and_cpu" not implemented for ''Float'''
+      package: torch
+    txt: dtype(self) in ["half", "int16", "int32", "int64", "uint8", "uint16", "uint32",
+      "uint64"]
+  - f1_score: 98.6842105263158
+    overall_score: 61.3421052631579
+    precision: 100.0
+    recall: 97.40259740259741
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        other: number
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        other: number
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

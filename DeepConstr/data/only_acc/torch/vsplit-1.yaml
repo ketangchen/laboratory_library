@@ -1,0 +1,62 @@
+args:
+  dtype:
+  - Tensor
+  - List[int]
+  is_pos:
+  - true
+  - false
+  name:
+  - self
+  - indices
+  required:
+  - true
+  - true
+name: torch.vsplit
+package: torch
+pass_rate: 100
+rules:
+- - cot: 'Based on the given runtime information, the error is triggered because the
+      tensor passed to `torch.vsplit` has 0 dimensions, but it is expected to have
+      at least 2 dimensions.
+
+
+      To prevent this error, we can formulate the following constraint:'
+    length: 1
+    target:
+      choosen_dtype:
+        indices: list[int]
+        self: tensor
+      msg: torch.vsplit requires a tensor with at least 2 dimension, but got a tensor
+        with 0 dimensions!
+      package: torch
+    txt: self.dim >= 2
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        indices: List[int]
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        indices: List[int]
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

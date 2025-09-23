@@ -1,0 +1,126 @@
+args:
+  dtype:
+  - Tensor
+  - Tensor
+  is_pos:
+  - true
+  - false
+  name:
+  - self
+  - other
+  required:
+  - true
+  - true
+name: torch.Tensor.__xor__
+package: torch
+pass_rate: 100
+rules:
+- - cot: synthesized
+    length: 4
+    target:
+      choosen_dtype:
+        other: tensor
+        self: tensor
+      msg: uint32
+      package: torch
+    txt: (((dtype(self) in ["int8", "int16", "int32", "int64", "uint8", "uint16",
+      "uint32", "uint64"] and dtype(other) in ["int8", "int16", "int32", "int64",
+      "uint8", "uint16", "uint32", "uint64"]) and (self.dtype == other.dtype)) or
+      (self.dim() == other.dim())) and (dtype(other) == "uint8")
+  - f1_score: 84.5094664371773
+    overall_score: 45.25473321858865
+    precision: 98.2
+    recall: 74.16918429003022
+- - cot: divided
+    length: 1
+    target:
+      choosen_dtype:
+        other: tensor
+        self: tensor
+      msg: '"bitwise_xor_cpu" not implemented for ''Half'''
+      package: torch
+    txt: not dtype(self) == "half"
+  - f1_score: 80.84074373484236
+    overall_score: 52.42037186742118
+    precision: 100.0
+    recall: 67.84260515603799
+- - cot: 'Based on the given runtime information, the constraint that prevents the
+      error is:'
+    length: 1
+    target:
+      choosen_dtype:
+        other: tensor
+        self: tensor
+      msg: The size of tensor a (9) must match the size of tensor b (6) at non-singleton
+        dimension 5
+      package: torch
+    txt: self.dim() == other.dim() and self.shape == other.shape
+  - f1_score: 86.6412213740458
+    overall_score: 49.3206106870229
+    precision: 90.8
+    recall: 82.84671532846714
+- - cot: ''
+    length: 1
+    target:
+      choosen_dtype:
+        other: tensor
+        self: tensor
+      msg: '"bitwise_xor_cpu" not implemented for ''Float'''
+      package: torch
+    txt: dtype(self) != "float"
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        other: Tensor
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape) and all(i >= 0 for i in other.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        other: Tensor
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7 and other.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        other: Tensor
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape) and all(i >= 0 for i in other.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        other: Tensor
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7 and other.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

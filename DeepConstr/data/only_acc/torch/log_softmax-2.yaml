@@ -1,0 +1,91 @@
+args:
+  dtype:
+  - Tensor
+  - int
+  - None
+  is_pos:
+  - true
+  - false
+  - false
+  name:
+  - self
+  - dim
+  - dtype
+  required:
+  - true
+  - true
+  - false
+name: torch.log_softmax
+package: torch
+pass_rate: 100
+rules:
+- - cot: synthesized
+    length: 2
+    target:
+      choosen_dtype:
+        dim: int
+        dtype: None
+        self: tensor
+      msg: Dimension out of range (expected to be in range of [-2, 1], but got 39)
+      package: torch
+    txt: (dim >= -len(self.shape) and dim < len(self.shape)) and (-6 <= dim < 6)
+  - f1_score: 76.77543186180422
+    overall_score: 100
+    precision: 100.0
+    recall: 62.30529595015576
+- - cot: ''
+    length: 1
+    target:
+      choosen_dtype:
+        dim: int
+        dtype: None
+        self: tensor
+      msg: Expected out tensor to have dtype float, but got int instead
+      package: torch
+    txt: dtype(out) == dtype(self)
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: ''
+    length: 1
+    target:
+      choosen_dtype:
+        dim: int
+        dtype: None
+        self: tensor
+      msg: '"log_softmax_lastdim_kernel_impl" not implemented for ''Int'''
+      package: torch
+    txt: dtype(self) == torch.float32
+  - f1_score: 97.323600973236
+    overall_score: 100
+    precision: 100.0
+    recall: 94.7867298578199
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        dim: int
+        dtype: None
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        dim: int
+        dtype: None
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

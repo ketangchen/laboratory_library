@@ -1,0 +1,63 @@
+args:
+  dtype:
+  - Tensor
+  - number
+  - number
+  is_pos:
+  - true
+  - false
+  - false
+  name:
+  - self
+  - other
+  - alpha
+  required:
+  - true
+  - true
+  - false
+name: torch.add
+package: torch
+pass_rate: 100
+rules:
+- - cot: ''
+    length: 1
+    target:
+      choosen_dtype:
+        alpha: int
+        other: int
+        self: tensor
+      msg: result type Float can't be cast to the desired output type Int
+      package: torch
+    txt: dtype(self) == int32
+  - f1_score: 67.56756756756758
+    overall_score: 100
+    precision: 100.0
+    recall: 51.02040816326531
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        alpha: number
+        other: number
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        alpha: number
+        other: number
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

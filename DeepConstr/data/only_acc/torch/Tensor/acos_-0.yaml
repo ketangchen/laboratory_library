@@ -1,0 +1,76 @@
+args:
+  dtype:
+  - Tensor
+  is_pos:
+  - true
+  name:
+  - self
+  required:
+  - true
+name: torch.Tensor.acos_
+package: torch
+pass_rate: 100
+rules:
+- - cot: "The error is triggered because the result type Float cannot be cast to the\
+      \ Int. From the runtime information, we can infer that the input tensor has\
+      \ a data type of int32. To prevent this error, we need to make sure that the\
+      \ input tensor has a data type of float. \n\nTherefore, the constraint can be\
+      \ formulated as follows:"
+    target:
+      choosen_dtype:
+        self: tensor
+      msg: result type Float can't be cast to the desired output type Int
+      package: torch
+    txt: self.dtype == torch.float32
+  - f1_score: 98.52216748768473
+    overall_score: 100
+    precision: 100.0
+    recall: 97.0873786407767
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

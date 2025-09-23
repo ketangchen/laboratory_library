@@ -1,0 +1,61 @@
+args:
+  dtype:
+  - Tensor
+  is_pos:
+  - false
+  name:
+  - x
+  required:
+  - true
+name: torch._C._special.special_airy_ai
+package: torch
+pass_rate: 100
+rules:
+- - cot: synthesized
+    length: 3
+    target:
+      choosen_dtype:
+        x: tensor
+      msg: result type Float can't be cast to the desired output type Int
+      package: torch
+    txt: ((dtype(out) == dtype(x)) or (dtype(out)==int32)) and (dtype(out) == float)
+  - f1_score: 84.03361344537817
+    overall_score: 100
+    precision: 100.0
+    recall: 72.46376811594205
+- - cot: divided
+    length: 1
+    target:
+      choosen_dtype:
+        x: tensor
+      msg: '"airy_ai_cpu" not implemented for ''Half'''
+      package: torch
+    txt: dtype(x) != "half"
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        x: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in x.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        x: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: x.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

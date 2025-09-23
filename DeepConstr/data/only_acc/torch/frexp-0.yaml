@@ -1,0 +1,52 @@
+args:
+  dtype:
+  - Tensor
+  is_pos:
+  - true
+  name:
+  - self
+  required:
+  - true
+name: torch.frexp
+package: torch
+pass_rate: 100
+rules:
+- - cot: 'The error is triggered because the input tensor has an invalid data type.
+      The torch.frexp() function only supports floating-point dtypes. To prevent this
+      error, the input tensor should have a floating-point data type. Therefore, the
+      constraint is:'
+    length: 1
+    target:
+      choosen_dtype:
+        self: tensor
+      msg: torch.frexp() only supports floating-point dtypes
+      package: torch
+    txt: self.dtype in [torch.float16, torch.float32, torch.float64]
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

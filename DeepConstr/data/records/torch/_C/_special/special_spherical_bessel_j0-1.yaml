@@ -1,0 +1,85 @@
+args:
+  dtype:
+  - Tensor
+  - Tensor
+  is_pos:
+  - false
+  - false
+  name:
+  - x
+  - out
+  required:
+  - true
+  - true
+name: torch._C._special.special_spherical_bessel_j0
+package: torch
+pass_rate: 100
+rules:
+- - cot: ''
+    length: 1
+    target:
+      choosen_dtype:
+        out: tensor
+        x: tensor
+      msg: '"spherical_bessel_j0_cpu" not implemented for ''Half'''
+      package: torch
+    txt: dtype(x) != "half"
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: 'The error is caused because the output tensor type Int cannot accept the
+      function result type Float. The dtype of the output tensor should be the same
+      as the function result. Therefore, the dtype of the output tensor should be
+      ''Float''. Left : dtype(out), Op : ==, Right : float.'
+    length: 1
+    target:
+      choosen_dtype:
+        out: tensor
+        x: tensor
+      msg: result type Float can't be cast to the desired output type Int
+      package: torch
+    txt: dtype(out) == float
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: ''
+    length: 1
+    target:
+      choosen_dtype:
+        out: tensor
+        x: tensor
+      msg: Trying to resize storage that is not resizable
+      package: torch
+    txt: out.rank==x.rank and all(out.shape[i]==x.shape[i] for i in range(x.rank))
+  - f1_score: 83.85744234800839
+    overall_score: 53.928721174004195
+    precision: 100.0
+    recall: 72.20216606498195
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        out: Tensor
+        x: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in x.shape) and all(i >= 0 for i in out.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        out: Tensor
+        x: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: x.rank <= 7 and out.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

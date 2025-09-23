@@ -1,0 +1,105 @@
+args:
+  dtype:
+  - Tensor
+  - int
+  - int
+  - int
+  is_pos:
+  - true
+  - false
+  - false
+  - false
+  name:
+  - self
+  - offset
+  - dim1
+  - dim2
+  required:
+  - true
+  - false
+  - false
+  - false
+name: torch.Tensor.diagonal
+package: torch
+pass_rate: 24.0
+rules:
+- - cot: The error arises because the tensor size is too large. The shape of the tensor
+      is [8, 9, 9, 9, 9, 9, 9, 9, 9], and the torch.Tensor.diagonal function is trying
+      to create a diagonal tensor of the same shape. This exceeds the limit of the
+      function. Therefore, the constraint should be on the size of the tensor. The
+      shape of the tensor should be smaller.
+    length: 1
+    target:
+      choosen_dtype:
+        dim1: int
+        dim2: int
+        offset: int
+        self: tensor
+      msg: 'Too large tensor shape: shape = [8, 9, 9, 9, 9, 9, 9, 9, 9]'
+      package: torch
+    txt: len(self.shape) < 9 and max(self.shape) <= 8
+  - f1_score: 67.34006734006734
+    overall_score: 45.67003367003367
+    precision: 100.0
+    recall: 50.76142131979695
+- - cot: diagonal dimensions cannot be identical -1, 0
+    length: 1
+    target:
+      choosen_dtype:
+        dim1: int
+        dim2: int
+        offset: int
+        self: tensor
+      msg: diagonal dimensions cannot be identical -1, 0
+      package: torch
+    txt: dim1 != dim2
+  - f1_score: 70.20702070207021
+    overall_score: 47.103510351035105
+    precision: 78.0
+    recall: 63.829787234042556
+- - cot: ''
+    length: 1
+    target:
+      choosen_dtype:
+        dim1: int
+        dim2: int
+        offset: int
+        self: tensor
+      msg: Dimension out of range (expected to be in range of [-1, 0], but got 51)
+      package: torch
+    txt: dim1 >= -len(self.shape) and dim1 < len(self.shape) and dim2 >= -len(self.shape)
+      and dim2 < len(self.shape)
+  - f1_score: 80.25682182985554
+    overall_score: 52.12841091492777
+    precision: 100.0
+    recall: 67.02412868632707
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        dim1: int
+        dim2: int
+        offset: int
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        dim1: int
+        dim2: int
+        offset: int
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

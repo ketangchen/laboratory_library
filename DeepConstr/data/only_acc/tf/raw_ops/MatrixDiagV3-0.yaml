@@ -1,0 +1,197 @@
+args:
+  dtype:
+  - str
+  - float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+  - float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+  - str
+  - float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+  - float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+  - float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+  is_pos:
+  - false
+  - false
+  - false
+  - false
+  - false
+  - false
+  - false
+  name:
+  - align
+  - diagonal
+  - k
+  - name
+  - num_cols
+  - num_rows
+  - padding_value
+  required:
+  - false
+  - true
+  - true
+  - false
+  - false
+  - false
+  - false
+name: tf.raw_ops.MatrixDiagV3
+package: tensorflow
+pass_rate: 100
+rules:
+- - cot: 'The error is due to an invalid value for the ''align'' attribute. The value
+      provided is "oiwc", which is not in the allowed values: "LEFT_RIGHT", "RIGHT_LEFT",
+      "LEFT_LEFT", "RIGHT_RIGHT". Therefore, the ''align'' attribute should be corrected
+      to be one of the allowed values: "LEFT_RIGHT", "RIGHT_LEFT", "LEFT_LEFT", "RIGHT_RIGHT".'
+    length: 1
+    target:
+      choosen_dtype:
+        align: str
+        diagonal: tensor
+        k: tensor
+        name: str
+        num_cols: tensor
+        num_rows: tensor
+        padding_value: tensor
+      msg: "Value for attr 'align' of \"sZkA\" is not in the list of allowed values:\
+        \ \"LEFT_RIGHT\", \"RIGHT_LEFT\", \"LEFT_LEFT\", \"RIGHT_RIGHT\"\n\t; NodeDef:\
+        \ {{node MatrixDiagV3}}; Op<name=MatrixDiagV3; signature=diagonal:T, k:int32,\
+        \ num_rows:int32, num_cols:int32, padding_value:T -> output:T; attr=T:type;\
+        \ attr=align:string,default=\"RIGHT_LEFT\",allowed=[\"LEFT_RIGHT\", \"RIGHT_LEFT\"\
+        , \"LEFT_LEFT\", \"RIGHT_RIGHT\"]> [Op:MatrixDiagV3] name: vHiZ"
+      package: tensorflow
+    txt: align in ["LEFT_RIGHT", "RIGHT_LEFT", "LEFT_LEFT", "RIGHT_RIGHT"]
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: 'The error arises because the function tf.raw_ops.MatrixDiagV3 is expecting
+      ''k'', ''num_cols'', and ''num_rows'' to be of the data type int32, but they
+      are of type float32. Based on this, the constraints to prevent the error would
+      be:'
+    length: 1
+    target:
+      choosen_dtype:
+        align: str
+        diagonal: tensor
+        k: tensor
+        name: str
+        num_cols: tensor
+        num_rows: tensor
+        padding_value: tensor
+      msg: 'cannot compute MatrixDiagV3 as input #1(zero-based) was expected to be
+        a int32 tensor but is a float tensor [Op:MatrixDiagV3] name: wdCh'
+      package: tensorflow
+    txt: dtype(k) == dtype(num_cols) == dtype(num_rows) == int32
+  - f1_score: 98.8195615514334
+    overall_score: 51.833333333333336
+    precision: 97.66666666666667
+    recall: 100.0
+- - cot: 'The error indicates that the ''diag_index'' (k) is not a scalar or vector.
+      The received ''diag_index'' is a tensor with shape [2,9,9,9,9,9,9], so it needs
+      to be corrected. Therefore, the Left : k.dim, Ops : ''<='', Right : 1.'
+    length: 1
+    target:
+      choosen_dtype:
+        align: str
+        diagonal: tensor
+        k: tensor
+        name: str
+        num_cols: tensor
+        num_rows: tensor
+        padding_value: tensor
+      msg: '{{function_node __wrapped__MatrixDiagV3_device_/job:localhost/replica:0/task:0/device:CPU:0}}
+        diag_index must be a scalar or vector, received shape: [7,8,6,9,2,7,5] [Op:MatrixDiagV3]
+        name: BpIe'
+      package: tensorflow
+    txt: k.dim <= 1
+  - f1_score: 98.36065573770492
+    overall_score: 100
+    precision: 100.0
+    recall: 96.77419354838709
+- - cot: 'Based on the given runtime information, the error message states that the
+      num_rows tensor must be a scalar. Let''s see what the arguments were. The num_rows
+      tensor has dimensions [4, 3, 6, 7, 3, 3, 3], which means it is not a scalar.
+      Therefore, the constraint to prevent the error would be:'
+    length: 1
+    target:
+      choosen_dtype:
+        align: str
+        diagonal: tensor
+        k: tensor
+        name: str
+        num_cols: tensor
+        num_rows: tensor
+        padding_value: tensor
+      msg: '{{function_node __wrapped__MatrixDiagV3_device_/job:localhost/replica:0/task:0/device:CPU:0}}
+        num_rows must be a scalar [Op:MatrixDiagV3] name: SKBz'
+      package: tensorflow
+    txt: num_rows.dim == 0
+  - f1_score: 98.6842105263158
+    overall_score: 100
+    precision: 100.0
+    recall: 97.40259740259741
+- - cot: "Based on the given runtime information, the error message states that the\
+      \ \"num_cols\" argument must be a scalar. However, in the provided runtime information,\
+      \ the \"num_cols\" argument is a tensor with shape [5, 3, 3, 3, 3, 3]. \n\n\
+      To prevent this error, the \"num_cols\" argument should be a scalar, meaning\
+      \ it should not have any dimensions. \n\nThe constraint to prevent this error\
+      \ can be formulated as:"
+    length: 1
+    target:
+      choosen_dtype:
+        align: str
+        diagonal: tensor
+        k: tensor
+        name: str
+        num_cols: tensor
+        num_rows: tensor
+        padding_value: tensor
+      msg: '{{function_node __wrapped__MatrixDiagV3_device_/job:localhost/replica:0/task:0/device:CPU:0}}
+        num_cols must be a scalar [Op:MatrixDiagV3] name: hVKk'
+      package: tensorflow
+    txt: num_cols.dim == 0
+  - f1_score: 98.40142095914742
+    overall_score: 100
+    precision: 100.0
+    recall: 96.85314685314685
+- - cot: 'Based on the given runtime information, the error arises because the function
+      expects the `padding_value` to be a scalar but it is a tensor with shape `[3,
+      9, 2, 5, 9, 9]`.
+
+
+      To prevent the error, the `padding_value` tensor should be modified to have
+      a scalar shape. Therefore, the constraint is:'
+    length: 1
+    target:
+      choosen_dtype:
+        align: str
+        diagonal: tensor
+        k: tensor
+        name: str
+        num_cols: tensor
+        num_rows: tensor
+        padding_value: tensor
+      msg: '{{function_node __wrapped__MatrixDiagV3_device_/job:localhost/replica:0/task:0/device:CPU:0}}
+        padding_value must be a scalar [Op:MatrixDiagV3] name: sNuc'
+      package: tensorflow
+    txt: padding_value.shape.rank == 0
+  - f1_score: 97.82608695652173
+    overall_score: 100
+    precision: 100.0
+    recall: 95.74468085106382
+- - cot: synthesized
+    length: 2
+    target:
+      choosen_dtype:
+        align: str
+        diagonal: tensor
+        k: tensor
+        name: str
+        num_cols: tensor
+        num_rows: tensor
+        padding_value: tensor
+      msg: '{{function_node __wrapped__MatrixDiagV3_device_/job:localhost/replica:0/task:0/device:CPU:0}}
+        The number of rows is too small. [Op:MatrixDiagV3] name: OvMB'
+      package: tensorflow
+    txt: (num_rows.dim >= 6) or (num_rows.dim >= diagonal.dim)
+  - f1_score: 92.30769230769229
+    overall_score: 100
+    precision: 100.0
+    recall: 85.71428571428571

@@ -1,0 +1,106 @@
+args:
+  dtype:
+  - str
+  - float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+  - float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+  is_pos:
+  - false
+  - false
+  - false
+  name:
+  - name
+  - x1
+  - x2
+  required:
+  - false
+  - true
+  - true
+name: tf.raw_ops.NextAfter
+package: tensorflow
+pass_rate: 93.33333333333333
+rules:
+- - cot: synthesized
+    length: 3
+    target:
+      choosen_dtype:
+        name: str
+        x1: tensor
+        x2: tensor
+      msg: '{{function_node __wrapped__NextAfter_device_/job:localhost/replica:0/task:0/device:CPU:0}}
+        Incompatible shapes: [4,4] vs. [1,7,7] [Op:NextAfter] name: SQzZ'
+      package: tensorflow
+    txt: ((all(x1.shape[i] == x2.shape[i] or x1.shape[i] == 1 or x2.shape[i] == 1
+      for i in range(-1, -min(len(x1.shape), len(x2.shape))-1, -1))) and (len(x1.shape)
+      == len(x2.shape))) and (all(x1.shape[i] == x2.shape[i] for i in range(5)))
+  - f1_score: 95.4653937947494
+    overall_score: 100
+    precision: 100.0
+    recall: 91.32420091324201
+- - cot: 'Based on the given runtime information, the error occurs because the function
+      "NextAfter" is expecting input #1 (zero-based) to be a float tensor, but it
+      is receiving an int32 tensor. To prevent this error, the data type of the second
+      input tensor should be changed to float to match the data type of the first
+      input tensor. Therefore, the constraint that should be added is:'
+    length: 1
+    target:
+      choosen_dtype:
+        name: str
+        x1: tensor
+        x2: tensor
+      msg: 'cannot compute NextAfter as input #1(zero-based) was expected to be a
+        float tensor but is a int32 tensor [Op:NextAfter] name: mcGr'
+      package: tensorflow
+    txt: dtype(x2) == dtype(x1)
+  - f1_score: 87.17948717948718
+    overall_score: 100
+    precision: 100.0
+    recall: 77.27272727272727
+- - cot: 'The error is due to the incompatible data types for ''x1'' and ''x2'' from
+      args. For ''x1'', the data type provided is int32, which is not in the allowed
+      values: double, float. Therefore, the data type of ''x1'' should be corrected
+      to be either double or float, which is [double, float]. Op : in, and Right :
+      [double, float].'
+    length: 1
+    target:
+      choosen_dtype:
+        name: str
+        x1: tensor
+        x2: tensor
+      msg: "Value for attr 'T' of int32 is not in the list of allowed values: double,\
+        \ float\n\t; NodeDef: {{node NextAfter}}; Op<name=NextAfter; signature=x1:T,\
+        \ x2:T -> output:T; attr=T:type,default=DT_FLOAT,allowed=[DT_DOUBLE, DT_FLOAT]>\
+        \ [Op:NextAfter] name: eYqR"
+      package: tensorflow
+    txt: x1.dtype in [double, float]
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        name: str
+        x1: float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+        x2: float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+      msg: negative dimensions are not allowed
+      package: tensorflow
+    txt: all(i >= 0 for i in x1.shape) and all(i >= 0 for i in x2.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        name: str
+        x1: float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+        x2: float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+      msg: Too large tensor shape
+      package: tensorflow
+    txt: x1.rank <= 7 and x2.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

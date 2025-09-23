@@ -1,0 +1,78 @@
+args:
+  dtype:
+  - Tensor
+  - number
+  - number
+  is_pos:
+  - true
+  - false
+  - false
+  name:
+  - self
+  - beta
+  - threshold
+  required:
+  - true
+  - false
+  - false
+name: torch._C._nn.softplus
+package: torch
+pass_rate: 100
+rules:
+- - cot: 'Based on the given runtime information, the constraint that would prevent
+      the error is:'
+    length: 1
+    target:
+      choosen_dtype:
+        beta: int
+        self: tensor
+        threshold: int
+      msg: Found dtype Float but expected Int
+      package: torch
+    txt: dtype(out) == dtype(self)
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: synthesized
+    length: 2
+    target:
+      choosen_dtype:
+        beta: int
+        self: tensor
+        threshold: int
+      msg: '"softplus_cpu" not implemented for ''Int'''
+      package: torch
+    txt: (beta >= 0) and (self.dtype in [torch.float32, torch.float64])
+  - f1_score: 94.11764705882352
+    overall_score: 100
+    precision: 100.0
+    recall: 88.88888888888889
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        beta: number
+        self: Tensor
+        threshold: number
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        beta: number
+        self: Tensor
+        threshold: number
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

@@ -1,0 +1,70 @@
+args:
+  dtype:
+  - Tensor
+  - Tensor
+  is_pos:
+  - true
+  - false
+  name:
+  - self
+  - max
+  required:
+  - true
+  - true
+name: torch.clamp_max
+package: torch
+pass_rate: 100
+rules:
+- - cot: divided
+    length: 1
+    target:
+      choosen_dtype:
+        max: tensor
+        self: tensor
+      msg: The size of tensor a (8) must match the size of tensor b (9) at non-singleton
+        dimension 3
+      package: torch
+    txt: self.shape[6] == max.shape[6]
+  - f1_score: 76.43312101910827
+    overall_score: 100
+    precision: 100.0
+    recall: 61.855670103092784
+- - cot: ''
+    length: 1
+    target:
+      choosen_dtype:
+        max: tensor
+        self: tensor
+      msg: result type Float can't be cast to the desired output type Int
+      package: torch
+    txt: dtype(self) == dtype(max) and dtype(max) == dtype(out)
+  - f1_score: 67.44186046511626
+    overall_score: 100
+    precision: 100.0
+    recall: 50.87719298245613
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        max: Tensor
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape) and all(i >= 0 for i in max.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        max: Tensor
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7 and max.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

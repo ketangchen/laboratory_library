@@ -1,0 +1,64 @@
+args:
+  dtype:
+  - float
+  - float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+  - str
+  is_pos:
+  - false
+  - false
+  - false
+  name:
+  - contrast_factor
+  - images
+  - name
+  required:
+  - true
+  - true
+  - false
+name: tf.raw_ops.AdjustContrastv2
+package: tensorflow
+pass_rate: 100
+rules:
+- - cot: ''
+    length: 1
+    target:
+      choosen_dtype:
+        contrast_factor: float
+        images: tensor
+        name: str
+      msg: '{{function_node __wrapped__AdjustContrastv2_device_/job:localhost/replica:0/task:0/device:CPU:0}}
+        input must be at least 3-D, got shape[3,3] [Op:AdjustContrastv2] name: oFwm'
+      package: tensorflow
+    txt: (images.dim >= 3)
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        contrast_factor: float
+        images: float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+        name: str
+      msg: negative dimensions are not allowed
+      package: tensorflow
+    txt: all(i >= 0 for i in images.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        contrast_factor: float
+        images: float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+        name: str
+      msg: Too large tensor shape
+      package: tensorflow
+    txt: images.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

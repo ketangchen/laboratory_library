@@ -1,0 +1,100 @@
+args:
+  dtype:
+  - Tensor
+  - Tensor
+  - Optional[bool]
+  - Optional[bool]
+  - str
+  is_pos:
+  - false
+  - false
+  - false
+  - false
+  - false
+  name:
+  - input
+  - target
+  - size_average
+  - reduce
+  - reduction
+  required:
+  - true
+  - true
+  - false
+  - false
+  - false
+name: torch.nn.functional.l1_loss
+package: torch
+pass_rate: 100
+rules:
+- - cot: "The error is triggered because the size of tensor a (6) does not match the\
+      \ size of tensor b (7) at non-singleton dimension 3. \n\nTo prevent this error,\
+      \ we need to ensure that the size of tensor a and tensor b match at non-singleton\
+      \ dimension 3. \n\nThe constraint can be formulated as follows:"
+    length: 1
+    target:
+      choosen_dtype:
+        input: tensor
+        reduce: bool
+        reduction: str
+        size_average: bool
+        target: tensor
+      msg: The size of tensor a (4) must match the size of tensor b (6) at non-singleton
+        dimension 4
+      package: torch
+    txt: (input.shape[3] == target.shape[3])
+  - f1_score: 77.61966364812419
+    overall_score: 100
+    precision: 100.0
+    recall: 63.424947145877375
+- - cot: The error is caused by an invalid value for the 'reduction' argument. The
+      value provided is 'zNYF', which is not a valid value for 'reduction'. The valid
+      values for 'reduction' are 'none', 'mean', and 'sum'. To prevent the error,
+      the value for 'reduction' should be one of the valid values.
+    length: 1
+    target:
+      choosen_dtype:
+        input: tensor
+        reduce: None
+        reduction: str
+        size_average: None
+        target: tensor
+      msg: xboT is not a valid value for reduction
+      package: torch
+    txt: reduction in ['none', 'mean', 'sum']
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        input: Tensor
+        reduce: Optional[bool]
+        reduction: str
+        size_average: Optional[bool]
+        target: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in input.shape) and all(i >= 0 for i in target.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        input: Tensor
+        reduce: Optional[bool]
+        reduction: str
+        size_average: Optional[bool]
+        target: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: input.rank <= 7 and target.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

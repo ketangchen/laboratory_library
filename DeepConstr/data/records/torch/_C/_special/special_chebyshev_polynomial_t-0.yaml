@@ -1,0 +1,59 @@
+args:
+  dtype:
+  - Tensor
+  - Tensor
+  is_pos:
+  - false
+  - false
+  name:
+  - x
+  - n
+  required:
+  - true
+  - true
+name: torch._C._special.special_chebyshev_polynomial_t
+package: torch
+pass_rate: 100
+rules:
+- - cot: "Error is triggered because the size of tensor a (3) must match the size\
+      \ of tensor b (5) at non-singleton dimension 6. \n\nThe formula to prevent this\
+      \ error can be written as:"
+    length: 1
+    target:
+      choosen_dtype:
+        n: tensor
+        x: tensor
+      msg: The size of tensor a (5) must match the size of tensor b (7) at non-singleton
+        dimension 5
+      package: torch
+    txt: (n.dim() == x.dim()) and (n.size() == x.size())
+  - f1_score: 93.19899244332494
+    overall_score: 58.59949622166247
+    precision: 92.5
+    recall: 93.90862944162436
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        n: Tensor
+        x: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in x.shape) and all(i >= 0 for i in n.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        n: Tensor
+        x: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: x.rank <= 7 and n.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

@@ -1,0 +1,73 @@
+args:
+  dtype:
+  - Tensor
+  - float
+  - bool
+  - bool
+  is_pos:
+  - false
+  - false
+  - false
+  - false
+  name:
+  - input
+  - p
+  - training
+  - inplace
+  required:
+  - true
+  - false
+  - false
+  - false
+name: torch.nn.functional.dropout
+package: torch
+pass_rate: 100
+rules:
+- - cot: 'The error is due to the invalid ''p'' value. The value of ''p'' is -2.0,
+      which is outside the valid range of 0 to 1. To prevent this error in the future,
+      we need to ensure that the ''p'' value falls between 0 and 1. We can express
+      this constraint as:'
+    length: 1
+    target:
+      choosen_dtype:
+        inplace: bool
+        input: tensor
+        p: float
+        training: bool
+      msg: dropout probability has to be between 0 and 1, but got 2.0
+      package: torch
+    txt: p >= 0 and p <= 1
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        inplace: bool
+        input: Tensor
+        p: float
+        training: bool
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in input.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        inplace: bool
+        input: Tensor
+        p: float
+        training: bool
+      msg: Too large tensor shape
+      package: torch
+    txt: input.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

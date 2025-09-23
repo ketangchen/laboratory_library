@@ -1,0 +1,85 @@
+args:
+  dtype:
+  - Tensor
+  - int
+  - int
+  - int
+  is_pos:
+  - true
+  - false
+  - false
+  - false
+  name:
+  - self
+  - offset
+  - dim1
+  - dim2
+  required:
+  - true
+  - false
+  - false
+  - false
+name: torch.Tensor.diag_embed
+package: torch
+pass_rate: 77.60000000000001
+rules:
+- - cot: ''
+    target:
+      choosen_dtype:
+        dim1: int
+        dim2: int
+        offset: int
+        self: tensor
+      msg: Dimension out of range (expected to be in range of [-2, 1], but got 87)
+      package: torch
+    txt: dim1 >= -len(self.shape) and dim1 < len(self.shape) and dim2 >= -len(self.shape)
+      and dim2 < len(self.shape)
+  - f1_score: 91.97475202885484
+    overall_score: 100
+    precision: 100.0
+    recall: 85.14190317195325
+- - cot: divided
+    length: 1
+    target:
+      choosen_dtype:
+        dim1: int
+        dim2: int
+        offset: int
+        self: tensor
+      msg: diagonal dimensions cannot be identical 0, 0
+      package: torch
+    txt: dim1 != 0
+  - f1_score: 88.39285714285715
+    overall_score: 56.19642857142858
+    precision: 79.2
+    recall: 100.0
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        dim1: int
+        dim2: int
+        offset: int
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        dim1: int
+        dim2: int
+        offset: int
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

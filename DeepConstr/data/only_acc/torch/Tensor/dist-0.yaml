@@ -1,0 +1,63 @@
+args:
+  dtype:
+  - Tensor
+  - Tensor
+  - number
+  is_pos:
+  - true
+  - false
+  - false
+  name:
+  - self
+  - other
+  - p
+  required:
+  - true
+  - true
+  - false
+name: torch.Tensor.dist
+package: torch
+pass_rate: 21.372549019607842
+rules:
+- - cot: synthesized
+    target:
+      choosen_dtype:
+        other: tensor
+        p: int
+        self: tensor
+      msg: The size of tensor a (6) must match the size of tensor b (7) at non-singleton
+        dimension 3
+      package: torch
+    txt: (self.shape[2] == 1) and (self.shape[1] == other.shape[0])
+  - f1_score: 46.534653465346544
+    overall_score: 19.93137254901961
+    precision: 36.86274509803922
+    recall: 63.08724832214765
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        other: Tensor
+        p: number
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape) and all(i >= 0 for i in other.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        other: Tensor
+        p: number
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7 and other.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

@@ -1,0 +1,80 @@
+args:
+  dtype:
+  - str
+  - float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+  - float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+  is_pos:
+  - false
+  - false
+  - false
+  name:
+  - name
+  - x
+  - y
+  required:
+  - false
+  - true
+  - true
+name: tf.math.subtract
+package: tensorflow
+pass_rate: 7.333333333333333
+rules:
+- - cot: synthesized
+    length: 2
+    target:
+      choosen_dtype:
+        name: str
+        x: tensor
+        y: tensor
+      msg: '{{function_node __wrapped__Sub_device_/job:localhost/replica:0/task:0/device:CPU:0}}
+        Incompatible shapes: [4,3,7,2,3,3] vs. [9,8,5,3,2,8,8] [Op:Sub] name: PuTg'
+      package: tensorflow
+    txt: (all(x.shape[i] == y.shape[i] for i in range(x.rank))) or (x.shape[i] ==
+      1)
+  - f1_score: 94.63722397476342
+    overall_score: 100
+    precision: 100.0
+    recall: 89.82035928143713
+- - cot: synthesized
+    length: 2
+    target:
+      choosen_dtype:
+        name: str
+        x: tensor
+        y: tensor
+      msg: 'cannot compute Sub as input #1(zero-based) was expected to be a int32
+        tensor but is a float tensor [Op:Sub] name: WVXv'
+      package: tensorflow
+    txt: (dtype(y) == float) and (dtype(y) == dtype(x))
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        name: str
+        x: float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+        y: float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+      msg: negative dimensions are not allowed
+      package: tensorflow
+    txt: all(i >= 0 for i in x.shape) and all(i >= 0 for i in y.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        name: str
+        x: float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+        y: float16,float32,float64,uint8,complex64,complex128,int8,int16,int32,int64,bool
+      msg: Too large tensor shape
+      package: tensorflow
+    txt: x.rank <= 7 and y.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

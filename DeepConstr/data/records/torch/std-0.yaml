@@ -1,0 +1,59 @@
+args:
+  dtype:
+  - Tensor
+  - bool
+  is_pos:
+  - true
+  - false
+  name:
+  - self
+  - unbiased
+  required:
+  - true
+  - false
+name: torch.std
+package: torch
+pass_rate: 100
+rules:
+- - cot: 'Error is triggered because the function torch.std only supports floating
+      point and complex data types, but the input tensor is of type Tensor<i32>. To
+      prevent the error, the input tensor should be converted to a floating point
+      or complex data type. Therefore, the constraint to prevent the error is:'
+    length: 1
+    target:
+      choosen_dtype:
+        self: tensor
+        unbiased: bool
+      msg: std and var only support floating point and complex dtypes
+      package: torch
+    txt: self.dtype in [torch.float32, torch.float64, torch.complex64, torch.complex128]
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        self: Tensor
+        unbiased: bool
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        self: Tensor
+        unbiased: bool
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

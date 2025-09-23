@@ -1,0 +1,59 @@
+args:
+  dtype:
+  - Tensor
+  - number
+  is_pos:
+  - true
+  - false
+  name:
+  - self
+  - other
+  required:
+  - true
+  - true
+name: torch.Tensor.floor_divide_
+package: torch
+pass_rate: 100
+rules:
+- - cot: 'The error is ZeroDivisionError, which means the argument ''other'' is being
+      set to zero. Division by zero is not defined and thus raises an error. Let''s
+      see what the args were. It seems ''other'' is the argument which should be corrected.
+      Therefore, Left : other. Op : !=, and Right : 0'
+    length: 1
+    target:
+      choosen_dtype:
+        other: int
+        self: tensor
+      msg: ZeroDivisionError
+      package: torch
+    txt: other != 0
+  - f1_score: 67.31488406881078
+    overall_score: 100
+    precision: 100.0
+    recall: 50.732807215332585
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        other: number
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        other: number
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

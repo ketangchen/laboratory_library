@@ -1,0 +1,72 @@
+args:
+  dtype:
+  - Tensor
+  - Tensor
+  is_pos:
+  - true
+  - false
+  name:
+  - self
+  - out
+  required:
+  - true
+  - true
+name: torch.cos
+package: torch
+pass_rate: 91.0
+rules:
+- - cot: The error occurs because the output tensor is of type Int while the function
+      torch.cos is trying to return a Float. The output tensor should have the same
+      type as the returned result of the function. Therefore, the dtype of the output
+      tensor should be changed to Float.
+    length: 1
+    target:
+      choosen_dtype:
+        out: tensor
+        self: tensor
+      msg: result type Float can't be cast to the desired output type Int
+      package: torch
+    txt: dtype(out)==dtype(self)
+  - f1_score: 80.6312769010043
+    overall_score: 52.31563845050215
+    precision: 93.66666666666667
+    recall: 70.78085642317382
+- - cot: ''
+    length: 1
+    target:
+      choosen_dtype:
+        out: tensor
+        self: tensor
+      msg: Trying to resize storage that is not resizable
+      package: torch
+    txt: out.rank == self.rank and all(out.shape[i] == self.shape[i] for i in range(out.rank))
+  - f1_score: 74.69026548672566
+    overall_score: 49.34513274336283
+    precision: 70.33333333333334
+    recall: 79.62264150943396
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        out: Tensor
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape) and all(i >= 0 for i in out.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        out: Tensor
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7 and out.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

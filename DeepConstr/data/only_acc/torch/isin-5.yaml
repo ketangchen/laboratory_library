@@ -1,0 +1,70 @@
+args:
+  dtype:
+  - number
+  - Tensor
+  - bool
+  - bool
+  is_pos:
+  - false
+  - false
+  - false
+  - false
+  name:
+  - element
+  - test_elements
+  - assume_unique
+  - invert
+  required:
+  - true
+  - true
+  - false
+  - false
+name: torch.isin
+package: torch
+pass_rate: 99.66666666666667
+rules:
+- - cot: divided
+    length: 1
+    target:
+      choosen_dtype:
+        assume_unique: bool
+        element: int
+        invert: bool
+        test_elements: tensor
+      msg: Trying to resize storage that is not resizable
+      package: torch
+    txt: out.shape[0]==0
+  - f1_score: 66.815144766147
+    overall_score: 100
+    precision: 100.0
+    recall: 50.16722408026756
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        assume_unique: bool
+        element: number
+        invert: bool
+        test_elements: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in test_elements.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        assume_unique: bool
+        element: number
+        invert: bool
+        test_elements: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: test_elements.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

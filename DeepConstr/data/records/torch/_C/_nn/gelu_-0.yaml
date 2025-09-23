@@ -1,0 +1,72 @@
+args:
+  dtype:
+  - Tensor
+  - str
+  is_pos:
+  - true
+  - false
+  name:
+  - self
+  - approximate
+  required:
+  - true
+  - false
+name: torch._C._nn.gelu_
+package: torch
+pass_rate: 100
+rules:
+- - cot: 'The error is due to the ''approximate'' argument being set to ''tanh'' and
+      the data type of the ''self'' tensor being ''Int''. The ''GeluKernelImpl'' is
+      not implemented for ''Int'' data type. To prevent this error, the ''self'' tensor
+      should have a data type of ''Float''. So, the constraint would be:'
+    length: 1
+    target:
+      choosen_dtype:
+        approximate: str
+        self: tensor
+      msg: '"GeluKernelImpl" not implemented for ''Int'''
+      package: torch
+    txt: dtype(self) == Float
+  - f1_score: 99.00990099009901
+    overall_score: 61.504950495049506
+    precision: 100.0
+    recall: 98.0392156862745
+- - cot: divided
+    length: 1
+    target:
+      choosen_dtype:
+        approximate: str
+        self: tensor
+      msg: approximate argument must be either none or tanh.
+      package: torch
+    txt: approximate == tanh
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        approximate: str
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        approximate: str
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

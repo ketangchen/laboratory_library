@@ -1,0 +1,113 @@
+args:
+  dtype:
+  - Tensor
+  - int
+  is_pos:
+  - true
+  - false
+  name:
+  - self
+  - dim
+  required:
+  - true
+  - true
+name: torch.logcumsumexp
+package: torch
+pass_rate: 88.0
+rules:
+- - cot: divided
+    length: 1
+    target:
+      choosen_dtype:
+        dim: int
+        self: tensor
+      msg: Dimension out of range (expected to be in range of [-2, 1], but got 13)
+      package: torch
+    txt: dim >= -len(self.shape)
+  - f1_score: 78.1316348195329
+    overall_score: 49.0
+    precision: 92.0
+    recall: 67.89667896678966
+- - cot: divided
+    length: 1
+    target:
+      choosen_dtype:
+        dim: int
+        self: tensor
+      msg: Dimension out of range (expected to be in range of [-1, 0], but got 1)
+      package: torch
+    txt: dim < len(self.shape)
+  - f1_score: 82.32848232848232
+    overall_score: 52.5
+    precision: 99.0
+    recall: 70.46263345195729
+- - cot: 'The error is due to the function "logcumsumexp_out_cpu" not being implemented
+      for tensors of type ''Int''. To prevent this error, the data type of the input
+      tensor should be changed to a floating-point type. So, Left : dtype(self), Op
+      : !=, Right : Int.'
+    length: 1
+    target:
+      choosen_dtype:
+        dim: int
+        self: tensor
+      msg: '"logcumsumexp_out_cpu" not implemented for ''Int'''
+      package: torch
+    txt: dtype(self) != Int
+  - f1_score: 69.32409012131716
+    overall_score: 100
+    precision: 100.0
+    recall: 53.05039787798409
+- - cot: The error is due to the function "torch.logcumsumexp" not being implemented
+      for the data type 'Bool'. To prevent this error, the input tensor should have
+      a data type other than 'Bool'.
+    length: 1
+    target:
+      choosen_dtype:
+        dim: int
+        self: tensor
+      msg: '"logcumsumexp_out_cpu" not implemented for ''Bool'''
+      package: torch
+    txt: self.dtype != torch.bool
+  - f1_score: 98.03921568627452
+    overall_score: 100
+    precision: 100.0
+    recall: 96.15384615384615
+- - cot: ''
+    length: 1
+    target:
+      choosen_dtype:
+        dim: int
+        self: tensor
+      msg: '''complex32'''
+      package: torch
+    txt: all((dim < self.dim() and self.size(dim) == 1) for dim in range(self.dim()))
+  - f1_score: 67.02081488811346
+    overall_score: 51.5
+    precision: 97.0
+    recall: 51.19751743893058
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        dim: int
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        dim: int
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

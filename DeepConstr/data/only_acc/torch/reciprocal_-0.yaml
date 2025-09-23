@@ -1,0 +1,53 @@
+args:
+  dtype:
+  - Tensor
+  is_pos:
+  - true
+  name:
+  - self
+  required:
+  - true
+name: torch.reciprocal_
+package: torch
+pass_rate: 100
+rules:
+- - cot: 'The error is triggered because the result type Float cannot be cast to the
+      Int. The function torch.reciprocal_ is trying to perform an operation that results
+      in a Float, but the output type is expected to be an Int. Therefore, the dtype
+      of ''self'' should be changed to Float. Left : dtype(self), Op : ==, Right :
+      float.'
+    length: 1
+    target:
+      choosen_dtype:
+        self: tensor
+      msg: result type Float can't be cast to the desired output type Int
+      package: torch
+    txt: dtype(self)==float
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

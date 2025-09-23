@@ -1,0 +1,91 @@
+args:
+  dtype:
+  - Tensor
+  - float
+  - float
+  - Optional[Generator]
+  is_pos:
+  - true
+  - false
+  - false
+  - false
+  name:
+  - self
+  - from
+  - to
+  - generator
+  required:
+  - true
+  - false
+  - false
+  - false
+name: torch.Tensor.uniform_
+package: torch
+pass_rate: 100
+rules:
+- - cot: The error is due to the fact that the function `torch.Tensor.uniform_` does
+      not support the data type 'Int'. Therefore, to prevent the error, the data type
+      of the tensor should be changed to a supported data type, such as 'Float'.
+    length: 1
+    target:
+      choosen_dtype:
+        from: float
+        self: tensor
+        to: float
+      msg: '"check_uniform_bounds" not implemented for ''Int'''
+      package: torch
+    txt: self.dtype in ['Float', 'Double', 'Half']
+  - f1_score: 98.36065573770492
+    overall_score: 61.18032786885246
+    precision: 100.0
+    recall: 96.77419354838709
+- - cot: 'The error is due to the ''from'' value being greater than the ''to'' value
+      in the uniform_ function. Let''s see what the args were. It seems that the ''from''
+      value is 5.0 and the ''to'' value is 0.9543962951859244. So, the ''from'' value
+      needs to be less than or equal to the ''to'' value to avoid this error. Therefore,
+      ''from'' <= ''to'' should be ensured. Therefore, left : ''from'' op : <= right
+      : ''to'''
+    length: 1
+    target:
+      choosen_dtype:
+        from: float
+        self: tensor
+        to: float
+      msg: uniform_ expects to return a [from, to) range, but found from=0.818842
+        > to=0.278326
+      package: torch
+    txt: '''from'' <= ''to'''
+  - f1_score: 96.61835748792271
+    overall_score: 60.309178743961354
+    precision: 100.0
+    recall: 93.45794392523365
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        from: float
+        generator: Optional[Generator]
+        self: Tensor
+        to: float
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        from: float
+        generator: Optional[Generator]
+        self: Tensor
+        to: float
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

@@ -1,0 +1,77 @@
+args:
+  dtype:
+  - Tensor
+  - Optional[int]
+  - bool
+  is_pos:
+  - true
+  - false
+  - false
+  name:
+  - self
+  - dim
+  - keepdim
+  required:
+  - true
+  - false
+  - false
+name: torch.Tensor.argmax
+package: torch
+pass_rate: 100
+rules:
+- - cot: synthesized
+    target:
+      choosen_dtype:
+        dim: int
+        keepdim: bool
+        self: tensor
+      msg: Dimension out of range (expected to be in range of [-1, 0], but got -4)
+      package: torch
+    txt: '(dim <= 0) and (
+
+      dim >= -1)'
+  - f1_score: 92.42144177449168
+    overall_score: 100
+    precision: 100.0
+    recall: 85.9106529209622
+- - cot: synthesized
+    target:
+      choosen_dtype:
+        dim: int
+        keepdim: bool
+        self: tensor
+      msg: 'argmax(): Expected reduction dim 0 to have non-zero size.'
+      package: torch
+    txt: (self.shape[0] != 0) and (self.shape[dim] != 0)
+  - f1_score: 82.5147347740668
+    overall_score: 46.2573673870334
+    precision: 100.0
+    recall: 70.23411371237458
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        dim: Optional[int]
+        keepdim: bool
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        dim: Optional[int]
+        keepdim: bool
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

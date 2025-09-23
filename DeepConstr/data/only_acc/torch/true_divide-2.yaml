@@ -1,0 +1,73 @@
+args:
+  dtype:
+  - Tensor
+  - Tensor
+  is_pos:
+  - true
+  - false
+  name:
+  - self
+  - other
+  required:
+  - true
+  - true
+name: torch.true_divide
+package: torch
+pass_rate: 100
+rules:
+- - cot: 'The error is triggered because the size of tensor `a` (4) does not match
+      the size of tensor `b` (9) at non-singleton dimension 1. To prevent this error,
+      we can formulate the constraint as follows:'
+    length: 1
+    target:
+      choosen_dtype:
+        other: tensor
+        self: tensor
+      msg: The size of tensor a (5) must match the size of tensor b (9) at non-singleton
+        dimension 6
+      package: torch
+    txt: self.shape[1] == other.shape[1]
+  - f1_score: 74.21150278293136
+    overall_score: 100
+    precision: 100.0
+    recall: 58.99705014749264
+- - cot: synthesized
+    length: 3
+    target:
+      choosen_dtype:
+        other: tensor
+        self: tensor
+      msg: Trying to resize storage that is not resizable
+      package: torch
+    txt: ((out.rank == self.rank) and (out.shape == other.shape)) and (out.rank==other.rank
+      and all(out.shape[i]==other.shape[i] for i in range(out.rank)))
+  - f1_score: 67.56756756756758
+    overall_score: 100
+    precision: 100.0
+    recall: 51.02040816326531
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        other: Tensor
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape) and all(i >= 0 for i in other.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        other: Tensor
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7 and other.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

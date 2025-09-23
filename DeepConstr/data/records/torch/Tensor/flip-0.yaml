@@ -1,0 +1,84 @@
+args:
+  dtype:
+  - Tensor
+  - List[int]
+  is_pos:
+  - true
+  - false
+  name:
+  - self
+  - dims
+  required:
+  - true
+  - true
+name: torch.Tensor.flip
+package: torch
+pass_rate: 100
+rules:
+- - cot: ''
+    length: 1
+    target:
+      choosen_dtype:
+        dims: list[int]
+        self: tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(dim >= 0 for dim in dims)
+  - f1_score: 80.64516129032259
+    overall_score: 52.322580645161295
+    precision: 100.0
+    recall: 67.56756756756756
+- - cot: ''
+    length: 1
+    target:
+      choosen_dtype:
+        dims: list[int]
+        self: tensor
+      msg: 'Too large tensor shape: shape = [7, 8, 9, 9, 9, 9, 9, 9, 9]'
+      package: torch
+    txt: self.shape[0] <= 7 and self.shape[1] <= 8 and self.shape[2] <= 9 and self.shape[3]
+      <= 9 and self.shape[4] <= 9 and self.shape[5] <= 9 and self.shape[6] <= 9 and
+      self.shape[7] <= 9 and self.shape[8] <= 9
+  - f1_score: 75.35795026375281
+    overall_score: 49.678975131876406
+    precision: 100.0
+    recall: 60.45949214026602
+- - cot: divided
+    length: 1
+    target:
+      choosen_dtype:
+        dims: list[int]
+        self: tensor
+      msg: dim 8 appears multiple times in the list of dims
+      package: torch
+    txt: len(dims) <= self.ndim
+  - f1_score: 75.07507507507508
+    overall_score: 49.53753753753754
+    precision: 100.0
+    recall: 60.09615384615385
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        dims: List[int]
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        dims: List[int]
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

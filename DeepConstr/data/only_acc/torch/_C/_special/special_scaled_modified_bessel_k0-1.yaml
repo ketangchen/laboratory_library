@@ -1,0 +1,52 @@
+args:
+  dtype:
+  - Tensor
+  is_pos:
+  - false
+  name:
+  - x
+  required:
+  - true
+name: torch._C._special.special_scaled_modified_bessel_k0
+package: torch
+pass_rate: 100
+rules:
+- - cot: 'The error is triggered because result type Float cannot be cast to the Int.
+      Let''s see what the args were. The dtype of ''out'' is Int and the dtype of
+      ''x'' is Float. Therefore, the dtypes of two arguments should be consistent.
+      Left : dtype(out), Op : ==, Right : dtype(x)'
+    length: 1
+    target:
+      choosen_dtype:
+        x: tensor
+      msg: result type Float can't be cast to the desired output type Int
+      package: torch
+    txt: dtype(out)==dtype(x)
+  - f1_score: 86.23853211009174
+    overall_score: 50.0
+    precision: 94.0
+    recall: 79.66101694915254
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        x: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in x.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        x: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: x.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

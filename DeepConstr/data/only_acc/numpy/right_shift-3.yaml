@@ -1,0 +1,43 @@
+args:
+  dtype:
+  - int
+  - int
+  is_pos:
+  - true
+  - true
+  name:
+  - x1
+  - x2
+  required:
+  - true
+  - true
+name: numpy.right_shift
+package: null
+pass_rate: 100
+rules:
+- - cot: default
+    length: 0
+    target:
+      choosen_dtype:
+        x1: int
+        x2: int
+      msg: negative dimensions are not allowed
+      package: null
+    txt: ''
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 0
+    target:
+      choosen_dtype:
+        x1: int
+        x2: int
+      msg: Too large tensor shape
+      package: null
+    txt: ''
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

@@ -1,0 +1,87 @@
+args:
+  dtype:
+  - Tensor
+  - Tensor
+  is_pos:
+  - true
+  - false
+  name:
+  - self
+  - other
+  required:
+  - true
+  - true
+name: torch.remainder
+package: torch
+pass_rate: 100
+rules:
+- - cot: 'Error is triggered because the size of tensor a (9) must match the size
+      of tensor b (8) at non-singleton dimension 6. The two tensors are inconsistent
+      in shape. Let''s see what the args were. The shape of self tensor is [3, 9,
+      9, 9, 9] and the shape of other tensor is [6, 7, 3, 8, 8, 8, 8]. Therefore,
+      the condition that would prevent the error is:'
+    length: 1
+    target:
+      choosen_dtype:
+        other: tensor
+        self: tensor
+      msg: The size of tensor a (9) must match the size of tensor b (7) at non-singleton
+        dimension 3
+      package: torch
+    txt: self.shape[6] == other.shape[6]
+  - f1_score: 75.046904315197
+    overall_score: 100
+    precision: 100.0
+    recall: 60.06006006006006
+- - cot: synthesized
+    length: 2
+    target:
+      choosen_dtype:
+        other: tensor
+        self: tensor
+      msg: Trying to resize storage that is not resizable
+      package: torch
+    txt: (out.shape == other.shape) and (out.rank==other.rank)
+  - f1_score: 84.21052631578947
+    overall_score: 100
+    precision: 100.0
+    recall: 72.72727272727273
+- - cot: divided
+    length: 1
+    target:
+      choosen_dtype:
+        other: tensor
+        self: tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(dim >= 0 for dim in other.shape)
+  - f1_score: 69.68641114982579
+    overall_score: 100
+    precision: 100.0
+    recall: 53.475935828877
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        other: Tensor
+        self: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape) and all(i >= 0 for i in other.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        other: Tensor
+        self: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7 and other.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

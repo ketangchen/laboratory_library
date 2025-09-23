@@ -1,0 +1,126 @@
+args:
+  dtype:
+  - Tensor
+  - Tensor
+  - Optional[bool]
+  - Optional[bool]
+  - str
+  - bool
+  is_pos:
+  - false
+  - false
+  - false
+  - false
+  - false
+  - false
+  name:
+  - input
+  - target
+  - size_average
+  - reduce
+  - reduction
+  - log_target
+  required:
+  - true
+  - true
+  - false
+  - false
+  - false
+  - false
+name: torch.nn.functional.kl_div
+package: torch
+pass_rate: 100
+rules:
+- - cot: synthesized
+    length: 2
+    target:
+      choosen_dtype:
+        input: tensor
+        log_target: bool
+        reduce: bool
+        reduction: str
+        size_average: bool
+        target: tensor
+      msg: 'kl_div: Integral inputs not supported.'
+      package: torch
+    txt: (input.dtype == torch.float32) and (target.dtype is torch.float32)
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: The error is due to an invalid value for the "reduction" argument. The provided
+      value is "lgwa", which is not a valid option for "reduction". The valid options
+      for "reduction" are "mean", "sum", and "none". Therefore, the value of "reduction"
+      should be corrected to be one of the valid options.
+    length: 1
+    target:
+      choosen_dtype:
+        input: tensor
+        log_target: bool
+        reduce: None
+        reduction: str
+        size_average: None
+        target: tensor
+      msg: LJSZ is not a valid value for reduction
+      package: torch
+    txt: reduction in ["mean", "sum", "none"]
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: 'The error is triggered because the size of tensor a (2) must match the size
+      of tensor b (9) at non-singleton dimension 5. Let''s see what the arguments
+      were. The two tensors are input and target. The dimensions and shapes of input
+      and target should be checked and corrected. Therefore, the constraint can be
+      formulated as follows:'
+    length: 1
+    target:
+      choosen_dtype:
+        input: tensor
+        log_target: bool
+        reduce: bool
+        reduction: str
+        size_average: bool
+        target: tensor
+      msg: The size of tensor a (2) must match the size of tensor b (9) at non-singleton
+        dimension 5
+      package: torch
+    txt: input.dim == target.dim and input.shape == target.shape
+  - f1_score: 99.33774834437087
+    overall_score: 61.66887417218543
+    precision: 100.0
+    recall: 98.68421052631578
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        input: Tensor
+        log_target: bool
+        reduce: Optional[bool]
+        reduction: str
+        size_average: Optional[bool]
+        target: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in input.shape) and all(i >= 0 for i in target.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 2
+    target:
+      choosen_dtype:
+        input: Tensor
+        log_target: bool
+        reduce: Optional[bool]
+        reduction: str
+        size_average: Optional[bool]
+        target: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: input.rank <= 7 and target.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

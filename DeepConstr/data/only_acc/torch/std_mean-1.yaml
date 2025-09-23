@@ -1,0 +1,76 @@
+args:
+  dtype:
+  - Tensor
+  - Optional[List[int]]
+  - bool
+  - bool
+  is_pos:
+  - true
+  - false
+  - false
+  - false
+  name:
+  - self
+  - dim
+  - unbiased
+  - keepdim
+  required:
+  - true
+  - false
+  - false
+  - false
+name: torch.std_mean
+package: torch
+pass_rate: 100
+rules:
+- - cot: 'Based on the given runtime information, the error is triggered because `torch.std_mean`
+      only supports floating point and complex dtypes, but the input tensor `self`
+      has dtype `i32`.
+
+
+      To prevent the error, the input tensor `self` must have a floating point or
+      complex dtype. Thus, the constraint can be formulated as:'
+    length: 1
+    target:
+      choosen_dtype:
+        dim: None
+        keepdim: bool
+        self: tensor
+        unbiased: bool
+      msg: std_mean only support floating point and complex dtypes
+      package: torch
+    txt: self.dtype in [torch.float32, torch.float64, torch.complex64, torch.complex128]
+  - f1_score: 100.0
+    overall_score: 100
+    precision: 100.0
+    recall: 100.0
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        dim: Optional[List[int]]
+        keepdim: bool
+        self: Tensor
+        unbiased: bool
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in self.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        dim: Optional[List[int]]
+        keepdim: bool
+        self: Tensor
+        unbiased: bool
+      msg: Too large tensor shape
+      package: torch
+    txt: self.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1

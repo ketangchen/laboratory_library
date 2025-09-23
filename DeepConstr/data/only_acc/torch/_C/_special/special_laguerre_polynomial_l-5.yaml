@@ -1,0 +1,58 @@
+args:
+  dtype:
+  - Tensor
+  - number
+  is_pos:
+  - false
+  - false
+  name:
+  - x
+  - n
+  required:
+  - true
+  - true
+name: torch._C._special.special_laguerre_polynomial_l
+package: torch
+pass_rate: 93.5
+rules:
+- - cot: "The error occurs because the result type Float cannot be cast to the desired\
+      \ output type Int. To prevent this error, the dtypes of the input tensor `out`\
+      \ and `x` should be consistent. \n\nThe constraint that prevents the error is:"
+    length: 1
+    target:
+      choosen_dtype:
+        n: int
+        x: tensor
+      msg: result type Float can't be cast to the desired output type Int
+      package: torch
+    txt: dtype(out) == dtype(x)
+  - f1_score: 90.54726368159204
+    overall_score: 48.5
+    precision: 91.0
+    recall: 90.0990099009901
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        n: number
+        x: Tensor
+      msg: negative dimensions are not allowed
+      package: torch
+    txt: all(i >= 0 for i in x.shape)
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
+- - cot: default
+    length: 1
+    target:
+      choosen_dtype:
+        n: number
+        x: Tensor
+      msg: Too large tensor shape
+      package: torch
+    txt: x.rank <= 7
+  - f1_score: -1
+    overall_score: -1
+    precision: -1
+    recall: -1
