@@ -76,6 +76,8 @@ class Inferencer() :
         LLM_LOG.info(f'Inferencing with {self.model}\{formatted_dict(self.args, split=", ")} \nSystem :\n{contexts}\nPrompts :\n{prompts}\n')
         client = openai.OpenAI(
             api_key=os.getenv('OPENAI_API_KEY1'),
+            base_url=os.getenv('OPENAI_API_URL1'),
+            default_headers=os.getenv('OPENAI_DEFAULT_HEADERS1'),
             timeout=self.setting['timeout']
         )
         try:
