@@ -1,0 +1,53 @@
+# Optimized Training Configuration
+# Configuration for enhanced constraint extraction with static analysis and sampling validation
+
+# Training parameters
+train:
+  num_eval: 100
+  noise: 0.1
+  allow_zero_length_rate: 0.1
+  allow_zero_rate: 0.1
+  num_of_try: 10
+  parallel: 1
+  pass_rate: 95
+  retrain: false
+
+# Static analysis configuration
+static_analysis:
+  enabled: true
+  confidence_threshold: 0.7
+  max_analysis_depth: 10
+  include_error_mappings: true
+  include_constraint_extraction: true
+
+# Sampling validation configuration
+sampling:
+  enabled: true
+  sample_rate: 0.1
+  min_samples: 10
+  max_samples: 1000
+  confidence_threshold: 0.8
+  strategies:
+    - random
+    - stratified
+    - adaptive
+
+# Error message processing
+error_processing:
+  similarity_threshold: 0.7
+  clustering_enabled: true
+  pattern_matching_enabled: true
+
+# Output configuration
+output:
+  save_enhanced_constraints: true
+  save_analysis_results: true
+  save_statistics: true
+  output_dir: "output/optimized_training"
+
+# Logging configuration
+logging:
+  level: INFO
+  enable_debug: false
+  log_enhancements: true
+  log_statistics: true
