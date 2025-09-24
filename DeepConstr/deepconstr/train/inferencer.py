@@ -82,14 +82,17 @@ class Inferencer() :
             timeout=self.setting['timeout']
         )
         try:
+            print(f'contexts is:\n{contexts}')
+            print(f'prompts is:\n{prompts}')
             completion = client.chat.completions.create(
                     model=self.model,
                     messages=[
-                        {'role' : "system", 'content' : contexts},
+                        #{'role' : "system", 'content' : contexts},
                         {'role': 'user', 'content': prompts},
                     ],
                     **self.args
             )
+            print(111111111)
         except openai.APIConnectionError as e:
             LLM_LOG.error(e.__cause__)  # an underlying Exception, likely raised within httpx.
         except openai.RateLimitError as e:
@@ -101,8 +104,10 @@ class Inferencer() :
 
         time_cost = time.time() - start
         if completion is None : 
+            print('completion is None')
             return 
         response = completion.choices[0].message.content
+        print(f'response is:{response}')
         LLM_LOG.info(f'Output(Ptk{completion.usage.prompt_tokens}-OtkPtk{completion.usage.completion_tokens}) : \n {response} \n Time cost : {time_cost} seconds \n')
         self.prompt_token += completion.usage.prompt_tokens
         self.complete_token += completion.usage.completion_tokens
