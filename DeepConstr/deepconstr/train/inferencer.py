@@ -75,24 +75,28 @@ class Inferencer() :
         start = time.time()
         
         LLM_LOG.info(f'Inferencing with {self.model}\{formatted_dict(self.args, split=", ")} \nSystem :\n{contexts}\nPrompts :\n{prompts}\n')
-        client = openai.OpenAI(
-            api_key=os.getenv('OPENAI_API_KEY1'),
-            base_url=os.getenv('OPENAI_API_URL1'),
-            default_headers={"x-foo": "true"},#json.loads(os.getenv('OPENAI_DEFAULT_HEADERS1')),
-            timeout=self.setting['timeout']
-        )
+        # client = openai.OpenAI(
+        #     api_key=os.getenv('OPENAI_API_KEY1'),
+        #     base_url=os.getenv('OPENAI_API_URL1'),
+        #     default_headers={"x-foo": "true"},#json.loads(os.getenv('OPENAI_DEFAULT_HEADERS1')),
+        #     timeout=self.setting['timeout']
+        # )
+        openai.api_key = os.getenv('OPENAI_API_KEY1')
+        openai.base_url = os.getenv('OPENAI_API_URL1')
+        openai.default_headers = {"x-foo": "true"}
         try:
-            print(f'contexts is:\n{contexts}')
-            print(f'prompts is:\n{prompts}')
-            completion = client.chat.completions.create(
-                    model=self.model,
-                    messages=[
-                        #{'role' : "system", 'content' : contexts},
-                        {'role': 'user', 'content': prompts},
-                    ],
-                    **self.args
+            print(f'======contexts is:\n{contexts}\n======')
+            print(f'======prompts is:\n{prompts}\n======')
+            # self.model,#{'role' : "system", 'content' : contexts},, #**self.args
+            completion = openai.chat.completions.create(
+                model="gpt-4o-mini", 
+                messages=[ 
+                    {"role": "system", "content": contexts},
+                    {"role": "user", "content": prompts} 
+                ],
+                timeout=120
             )
-            print(111111111)
+            print(f'======anwser is:{completion.choices[0].message.content}\n======')
         except openai.APIConnectionError as e:
             LLM_LOG.error(e.__cause__)  # an underlying Exception, likely raised within httpx.
         except openai.RateLimitError as e:
@@ -101,13 +105,15 @@ class Inferencer() :
             LLM_LOG.error("Another non-200-range status code was received")
             LLM_LOG.error(e.status_code)
             LLM_LOG.error(e.response)   
+        # except Exception as e:
+        #     print(f'======e is:{e}\n======')
 
         time_cost = time.time() - start
         if completion is None : 
-            print('completion is None')
+            print('======completion is None\n======')
             return 
         response = completion.choices[0].message.content
-        print(f'response is:{response}')
+        print(f'======response is:{response}\n======')
         LLM_LOG.info(f'Output(Ptk{completion.usage.prompt_tokens}-OtkPtk{completion.usage.completion_tokens}) : \n {response} \n Time cost : {time_cost} seconds \n')
         self.prompt_token += completion.usage.prompt_tokens
         self.complete_token += completion.usage.completion_tokens
