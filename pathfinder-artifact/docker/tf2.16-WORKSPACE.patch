@@ -1,0 +1,26 @@
+diff -Naur old/WORKSPACE new/WORKSPACE
+--- old/WORKSPACE	2024-10-26 19:52:19.430256631 +0900
++++ new/WORKSPACE	2024-10-26 19:51:33.677325900 +0900
+@@ -90,3 +90,22 @@
+ load("@//tensorflow:workspace0.bzl", "tf_workspace0")
+ 
+ tf_workspace0()
++
++new_local_repository(
++	name = "pathfinder_deps",
++	path = "/usr/local",
++	build_file_content = """
++cc_library(
++	name = "z3",
++	srcs = ["lib/libz3.so"],
++	includes = ["include"],
++	visibility = ["//visibility:public"],
++)
++cc_library(
++	name = "pathfinder",
++	srcs = ["lib/pathfinder/libpathfinder.a"],
++	includes = ["include/pathfinder"],
++	visibility = ["//visibility:public"],
++)
++""",
++)

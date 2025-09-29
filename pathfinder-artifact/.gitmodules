@@ -1,0 +1,6 @@
+[submodule "pathfinder"]
+	path = pathfinder
+	url = https://github.com/starlab-unist/pathfinder.git
+[submodule "pathfinder-driver-generator"]
+	path = pathfinder-driver-generator
+	url = https://github.com/starlab-unist/pathfinder-driver-generator.git

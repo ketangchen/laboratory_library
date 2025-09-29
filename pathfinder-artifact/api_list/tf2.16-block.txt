@@ -1,0 +1,10 @@
+# The following APIs are the ones that get stuck during fuzzing.
+# They are excluded from coverage measurement.
+
+tf.raw_ops.Unstage
+tf.raw_ops.OrderedMapPeek
+tf.raw_ops.MapUnstageNoKey
+tf.raw_ops.OrderedMapUnstageNoKey
+tf.raw_ops.MapPeek
+tf.raw_ops.OrderedMapUnstage
+tf.raw_ops.StagePeek

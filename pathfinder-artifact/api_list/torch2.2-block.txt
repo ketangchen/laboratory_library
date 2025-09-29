@@ -1,0 +1,4 @@
+# The following APIs are the ones that get stuck during fuzzing.
+# They are excluded from coverage measurement.
+
+torch.range

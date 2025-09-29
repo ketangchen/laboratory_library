@@ -1,0 +1,17 @@
+diff -Naur old/requirements.txt new/requirements.txt
+--- old/requirements.txt	2024-10-22 12:46:49.997790681 +0900
++++ new/requirements.txt	2024-10-22 12:47:27.643343462 +0900
+@@ -2,7 +2,7 @@
+ astunparse
+ expecttest
+ hypothesis
+-numpy
++numpy<2.0
+ psutil
+ pyyaml
+ requests
+@@ -18,3 +18,4 @@
+ setuptools ; python_version >= "3.12"
+ packaging
+ optree>=0.9.1
++backports.tarfile

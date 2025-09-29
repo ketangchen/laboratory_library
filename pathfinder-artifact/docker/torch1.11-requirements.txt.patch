@@ -1,0 +1,9 @@
+--- old/requirements.txt	2025-01-25 23:58:16.718947157 +0900
++++ new/requirements.txt	2025-01-26 00:03:59.863461149 +0900
+@@ -10,4 +10,5 @@
+ six
+ types-dataclasses
+ typing_extensions
+-dataclasses; python_version<"3.7"
++dataclasses; python_version<"3.7"
++backports.tarfile
