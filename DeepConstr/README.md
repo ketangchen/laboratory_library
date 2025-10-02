@@ -476,3 +476,165 @@ python experiments/eval_constr.py
 This script will automatically gather the constraints from the  default locations(`/DeepConstr/data/records/`). The resulting plots will be saved at`/DeepConstr/results/5_dist_tf.png` for TensorFlow and `/DeepConstr/results/5_dist_torch.png` for PyTorch.
 
 
+
+### 优化实践：LP‑CCR 开关与伪代码（对比可复现）
+
+> 目标：在不大改现有代码的前提下，加入 LP‑CCR（PAC‑Bayes 先验引导的补集约束精炼）相关开关与打分逻辑，便于与原 DeepConstr 做 A/B 对比与消融。
+
+#### 1. 统一开关与参数（示例命名，建议通过 Hydra 配置）
+
+- `lpccr.enable`：是否启用 LP‑CCR（默认 false）。
+- `lpccr.lambda`：KL 惩罚系数 λ（默认 0.3～1.0 之间根据时间预算调节）。
+- `lpccr.prior`：先验来源（`off` | `template-llm`）。
+- `lpccr.active`：是否启用主动补集采样（`true|false`）。
+- `lpccr.acq`：主动采样策略（`disagreement|entropy|random`）。
+- `lpccr.noise_fix`：是否启用“静态传播+LLM 反事实”降噪对齐（`true|false`）。
+- `lpccr.prop_test.m`：元素级性质测试的抽样大小 m（如 64）。
+- `lpccr.prop_test.gamma`：性质测试的置信间隔宽度 γ（如 0.05）。
+- `lpccr.prop_test.tau`：可接受的违例阈值 τ（常取 0 或极小正数）。
+
+以上开关可置于现有 Hydra 配置中，例如：`hydra.verbose=['fuzz','train'] lpccr.enable=true lpccr.lambda=0.5 ...`。
+
+#### 2. 评分函数（替换/扩展子约束的适配度打分）
+
+```python
+def compute_constraint_score(
+    candidate_h,
+    validation_samples,
+    prior_score: float,  # 由先验（LLM 模板一致度等）映射到 [0,1]
+    lambda_: float,
+    lpccr_enabled: bool,
+):
+    # 经验无效率 R_hat：候选约束对验证样本判为 invalid 的比例
+    invalid_cnt = 0
+    for x in validation_samples:
+        if not candidate_h.validate(x):
+            invalid_cnt += 1
+    R_hat = invalid_cnt / max(1, len(validation_samples))
+
+    if not lpccr_enabled:
+        return R_hat  # 兼容原逻辑：仅用经验无效率
+
+    # KL 代理项：以先验一致度作为负惩罚，越一致惩罚越小
+    # 将 prior_score∈[0,1] 转成 KL_proxy≥0，可采用：KL_proxy = 1 - prior_score
+    KL_proxy = max(0.0, 1.0 - float(prior_score))
+
+    # 目标：R_hat + lambda * KL_proxy
+    return R_hat + lambda_ * KL_proxy
+```
+
+最小改动：在 `deepconstr/train/*` 子约束搜索/遗传迭代中的“适配度/排序”处调用 `compute_constraint_score`，当 `lpccr.enable=false` 时与原结果保持一致。
+
+先验分数 `prior_score` 的一个简单实现：
+
+```python
+def llm_prior_score(api_doc: str, err_msg: str, sig: str, template: str) -> float:
+    """返回与模板的一致度分数 [0,1]，可用 LLM/规则打分、描述长度惩罚或关键词匹配实现。
+    示例：更简单、包含广播/形状/类型关键谓词的模板得分更高。"""
+    # 伪代码占位：工程中可缓存、降采样调用 LLM
+    return heuristic_score(api_doc, err_msg, sig, template)
+```
+
+#### 3. 主动补集采样（集成于 fuzz 循环）
+
+```python
+def select_next_candidates(candidates, committee_of_h, acq: str):
+    # candidates：补集生成的输入候选；committee_of_h：多个候选约束形成的“委员会”
+    def disagreement(x):
+        votes = [h.validate(x) for h in committee_of_h]
+        p = sum(votes) / max(1, len(votes))
+        return p * (1 - p)  # 方差作为不确定性
+
+    def entropy(x):
+        import math
+        p = sum(h.validate(x) for h in committee_of_h) / max(1, len(committee_of_h))
+        if p in (0, 1):
+            return 0.0
+        return -p * math.log(p + 1e-12) - (1 - p) * math.log(1 - p + 1e-12)
+
+    score_fn = disagreement if acq == 'disagreement' else (entropy if acq == 'entropy' else (lambda _: 0.0))
+    return sorted(candidates, key=score_fn, reverse=True)
+```
+
+将上述函数用于 `nnsmith/cli/fuzz.py` 的“候选样本队列”排序；当 `lpccr.active=false` 时跳过该排序，保持原有顺序。
+
+#### 4. 降噪对齐（错误信息 → 根因）
+
+```python
+def align_error_label(sample, raw_error_msg):
+    # 先行静态传播（形状/类型）定位高疑似根因字段
+    cause = static_infer_shape_type(sample)
+    # LLM 生成反事实最小修复（不改 dtype 时能否通过？不改 shape 时能否通过？）
+    cf = llm_counterfactual_fix(sample, raw_error_msg, cause)
+    # 回填到“子约束标签”（例如将问题从 dtype 对齐到 broadcast 形状）
+    return corrected_label_from(cf)
+```
+
+将其作为 `deepconstr/error.py` 的前置步骤，`lpccr.noise_fix=false` 时跳过。
+
+#### 5. 元素级性质测试（轻量概率保证）
+
+```python
+def property_test_elements(tensor, prop, m: int, gamma: float, tau: float) -> bool:
+    # 随机采样 m 个元素，估计违例率 p_hat
+    elems = random_sample_elements(tensor, m)
+    violations = sum(1 for v in elems if not prop(v))
+    p_hat = violations / max(1, m)
+    # 判定：若 p_hat > tau - gamma 则拒绝
+    return p_hat <= max(0.0, tau - gamma)
+```
+
+在 fuzz 后验校验处调用；当 `lpccr.prop_test.m=0` 或不开启相关断言时直接跳过。
+
+#### 6. 最小改动的函数签名（便于落地对接）
+
+- 训练/精炼（`deepconstr/train/...`）
+  - `compute_constraint_score(candidate_h, validation_samples, prior_score, lambda_, lpccr_enabled) -> float`
+  - `llm_prior_score(api_doc, err_msg, sig, template) -> float`
+
+- 采样/评估（`nnsmith/cli/fuzz.py` 或 `mgen.*`）
+  - `select_next_candidates(candidates, committee_of_h, acq: str) -> List[x]`
+  - `property_test_elements(tensor, prop, m, gamma, tau) -> bool`
+  - `align_error_label(sample, raw_error_msg) -> CorrectedLabel`
+
+#### 7. 调用示例（对比与消融）
+
+以下命令仅演示新增开关，其他参数与 README 示例保持一致。
+
+```bash
+# Baseline（原 DeepConstr）
+PYTHONPATH=$(pwd):$(pwd)/deepconstr:$(pwd)/nnsmith \
+python nnsmith/cli/fuzz.py \
+  fuzz.time=15m \
+  mgen.record_path=$(pwd)/data/records/torch \
+  fuzz.root=$(pwd)/outputs/torch-deepconstr-n5 \
+  fuzz.save_test=$(pwd)/outputs/torch-deepconstr-n5.models \
+  model.type=torch backend.type=torchcomp \
+  filter.type=[nan,dup,inf] hydra.verbose=['fuzz'] fuzz.resume=true \
+  mgen.method=deepconstr mgen.max_nodes=5 mgen.pass_rate=10
+
+# LP‑CCR（开启所有子模块）
+PYTHONPATH=$(pwd):$(pwd)/deepconstr:$(pwd)/nnsmith \
+python nnsmith/cli/fuzz.py \
+  fuzz.time=15m \
+  mgen.record_path=$(pwd)/data/records/torch \
+  fuzz.root=$(pwd)/outputs/torch-lpccr-n5 \
+  fuzz.save_test=$(pwd)/outputs/torch-lpccr-n5.models \
+  model.type=torch backend.type=torchcomp \
+  filter.type=[nan,dup,inf] hydra.verbose=['fuzz'] fuzz.resume=true \
+  mgen.method=deepconstr mgen.max_nodes=5 mgen.pass_rate=10 \
+  lpccr.enable=true lpccr.lambda=0.5 lpccr.prior=template-llm \
+  lpccr.active=true lpccr.acq=disagreement \
+  lpccr.noise_fix=true \
+  lpccr.prop_test.m=64 lpccr.prop_test.gamma=0.05 lpccr.prop_test.tau=0.0
+
+# 消融示例：去掉先验
+PYTHONPATH=$(pwd):$(pwd)/deepconstr:$(pwd)/nnsmith \
+python nnsmith/cli/fuzz.py ... lpccr.enable=true lpccr.prior=off lpccr.active=true
+
+# 消融示例：去掉主动采样
+PYTHONPATH=$(pwd):$(pwd)/deepconstr:$(pwd)/nnsmith \
+python nnsmith/cli/fuzz.py ... lpccr.enable=true lpccr.prior=template-llm lpccr.active=false
+```
+
+建议记录随机种子并使用 `experiments/summarize_merged_cov.py` 汇总覆盖与缺陷数据，以确保统计意义和可复现性。
