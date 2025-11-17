@@ -83,6 +83,12 @@ def demonstrate_mutations():
         except:
             print(f"\n⚠ 警告: 未找到 afl-fuzz 工具")
             print("请确保 AFL++ 已正确安装并在 PATH 中")
+            print("\n💡 提示:")
+            print("  1. 如果 AFL++ 已编译但未安装，使用: ./afl-fuzz")
+            print("  2. 查看安装指南: cat INSTALL_GUIDE_CN.md")
+            print("  3. 或查看官方文档: cat docs/INSTALL.md")
+            print("\n📝 您仍然可以查看变异操作演示（无需编译）:")
+            print("  python3 show_mutations.py")
             return
     
     print(f"✓ 找到 AFL++ 工具: {afl_fuzz}")
