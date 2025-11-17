@@ -230,7 +230,8 @@ run_test() {
     
     # 运行 afl-fuzz（使用兼容的 timeout 函数）
     echo "  开始运行 afl-fuzz..."
-    timeout_cmd "$TEST_TIME" "$AFL_FUZZ" -i "$INPUT_DIR" -o "$output_dir" -- "$TARGET_BINARY" @@ 2>&1 | tee "$output_dir/fuzzer.log" || true
+    # 使用 -n 选项以支持非插桩二进制文件（用于对比测试）
+    timeout_cmd "$TEST_TIME" "$AFL_FUZZ" -n -i "$INPUT_DIR" -o "$output_dir" -- "$TARGET_BINARY" @@ 2>&1 | tee "$output_dir/fuzzer.log" || true
     echo -e "${GREEN}  完成${NC}"
     
     # 提取指标
