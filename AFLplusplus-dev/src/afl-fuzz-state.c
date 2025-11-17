@@ -26,7 +26,6 @@
 #include <signal.h>
 #include <limits.h>
 #include "afl-fuzz.h"
-#include "afl-lattice-mab.h"
 #include "envs.h"
 
 char *power_names[POWER_SCHEDULES_NUM] = {"explore", "mmopt", "exploit",
@@ -152,9 +151,6 @@ void afl_state_init(afl_state_t *afl, uint32_t map_size) {
       (struct inf_profile *)ck_alloc(sizeof(struct inf_profile));
   afl->havoc_prof =
       (struct havoc_profile *)ck_alloc(sizeof(struct havoc_profile));
-
-  /* Initialize lattice-MAB system */
-  lattice_mab_init(afl);
 
   init_mopt_globals(afl);
 
@@ -940,9 +936,6 @@ void afl_state_deinit(afl_state_t *afl) {
   ck_free(afl->skipdet_g->virgin_det_bits);
   ck_free(afl->skipdet_g);
   ck_free(afl->havoc_prof);
-
-  /* Cleanup lattice-MAB system */
-  lattice_mab_deinit(afl);
 
   ck_free(afl->afl_env.afl_forksrv_supl_gids);
 

@@ -244,6 +244,9 @@ run_test() {
         echo "  配置: 启用 Lattice-MAB"
     fi
     
+    # 绕过核心转储检查（用于测试环境，避免需要修改系统配置）
+    export AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES=1
+    
     # 运行 afl-fuzz（使用兼容的 timeout 函数）
     echo "  开始运行 afl-fuzz..."
     # 使用 -n 选项以支持非插桩二进制文件（用于对比测试）

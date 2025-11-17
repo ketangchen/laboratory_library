@@ -24,54 +24,11 @@
  */
 
 #include "afl-fuzz.h"
-#include "afl-lattice-mab.h"
 #include "afl-ijon-min.h"
 #include <string.h>
 #include <limits.h>
 #include "cmplog.h"
 #include "afl-mutations.h"
-
-/* Provide non-inline definition for choose_block_len to satisfy linker */
-/* The inline definition is in afl-mutations.h, but we need a non-inline version */
-/* for cases where the function is not inlined */
-u32 choose_block_len(afl_state_t *afl, u32 limit) {
-  u32 min_value, max_value;
-  u32 rlim = MIN(afl->queue_cycle, (u32)3);
-
-  if (unlikely(!afl->run_over10m)) { rlim = 1; }
-
-  switch (rand_below(afl, rlim)) {
-
-    case 0:
-      min_value = 1;
-      max_value = HAVOC_BLK_SMALL;
-      break;
-
-    case 1:
-      min_value = HAVOC_BLK_SMALL;
-      max_value = HAVOC_BLK_MEDIUM;
-      break;
-
-    default:
-
-      if (likely(rand_below(afl, 10))) {
-
-        min_value = HAVOC_BLK_MEDIUM;
-        max_value = HAVOC_BLK_LARGE;
-
-      } else {
-
-        min_value = HAVOC_BLK_LARGE;
-        max_value = HAVOC_BLK_XL;
-
-      }
-
-  }
-
-  if (min_value >= limit) { min_value = 1; }
-
-  return min_value + rand_below(afl, MIN(max_value, limit) - min_value + 1);
-}
 
 /* MOpt */
 
@@ -2226,7 +2183,6 @@ havoc_stage:
   for (afl->stage_cur = 0; afl->stage_cur < afl->stage_max; ++afl->stage_cur) {
 
     u32 use_stacking = 1 + rand_below(afl, stack_max);
-    u32 r = 0, item = 0;  /* Declare r and item at loop level for use after retry_havoc_step, initialize to avoid warning */
 
     afl->stage_cur_val = use_stacking;
 
@@ -2273,14 +2229,8 @@ havoc_stage:
       }
 
     retry_havoc_step: {
-      
-      /* Use lattice-MAB selection if enabled, otherwise use random */
-      if (afl->lattice_mab && 
-          (afl->lattice_mab->use_lattice || afl->lattice_mab->use_mab)) {
-        r = lattice_mab_select_mutation(afl, mutation_array, rand_max);
-      } else {
-        r = rand_below(afl, rand_max);
-      }
+
+      u32 r = rand_below(afl, rand_max), item;
 
       switch (mutation_array[r]) {
 
@@ -3359,26 +3309,11 @@ havoc_stage:
 
       }
 
-      }
-
     }
 
-    /* Track mutation type and execution time for reward update */
-    /* Note: r is declared at the loop level, so it's accessible here */
-    u32 current_mut_type = mutation_array[r];
-    u64 exec_start_time = get_cur_time();
-    u32 queued_before = afl->queued_items;
-    u32 crashes_before = afl->saved_crashes;
+    }
 
     if (common_fuzz_stuff(afl, out_buf, temp_len)) { goto abandon_entry; }
-
-    /* Update lattice-MAB reward based on fuzzing result */
-    if (afl->lattice_mab) {
-      u64 exec_time_us = (get_cur_time() - exec_start_time) * 1000;  /* Convert to microseconds */
-      u8 found_new_path = (afl->queued_items > queued_before) ? 1 : 0;
-      u8 found_crash = (afl->saved_crashes > crashes_before) ? 1 : 0;
-      lattice_mab_update_reward(afl, current_mut_type, found_new_path, found_crash, exec_time_us);
-    }
 
     /* out_buf might have been mangled a bit, so let's restore it to its
        original size and shape. */

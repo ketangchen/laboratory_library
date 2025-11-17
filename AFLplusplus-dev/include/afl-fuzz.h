@@ -881,9 +881,6 @@ typedef struct afl_state {
 
   struct skipdet_global *skipdet_g;
 
-  /* Lattice-MAB mutation strategy optimization */
-  struct lattice_mab_state *lattice_mab;
-
   s64 last_scored_idx;           /* Index of the last queue entry re-scored */
 
 #ifdef INTROSPECTION

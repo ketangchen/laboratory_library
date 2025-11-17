@@ -37,11 +37,9 @@
   #error INTERESTING_32 is not defined - BUG!
 #endif
 
-#ifndef AFL_MUTATIONS_ARRAYS_DEFINED
 s8  interesting_8[] = {INTERESTING_8};
 s16 interesting_16[] = {INTERESTING_8, INTERESTING_16};
 s32 interesting_32[] = {INTERESTING_8, INTERESTING_16, INTERESTING_32};
-#endif
 
 enum {
 
@@ -88,8 +86,6 @@ enum {
 };
 
 #define MUT_TXT_ARRAY_SIZE 200
-#ifndef AFL_MUTATIONS_ARRAYS_DEFINED
-#define AFL_MUTATIONS_ARRAYS_DEFINED
 u32 text_array[MUT_TXT_ARRAY_SIZE] = {MUT_FLIPBIT,
                                       MUT_FLIPBIT,
                                       MUT_FLIPBIT,
@@ -1754,14 +1750,13 @@ u32 mutation_strategy_exploitation_binary[MUT_STRATEGY_ARRAY_SIZE] = {
     MUT_SPLICE_INSERT
 
 };
-#endif /* AFL_MUTATIONS_ARRAYS_DEFINED */
 
 u32 afl_mutate(afl_state_t *, u8 *, u32, u32, bool, bool, u8 *, u32, u32);
 u32 choose_block_len(afl_state_t *, u32);
 
 /* Helper to choose random block len for block operations in fuzz_one().
    Doesn't return zero, provided that max_len is > 0. */
-#ifndef AFL_MUTATIONS_ARRAYS_DEFINED
+
 inline u32 choose_block_len(afl_state_t *afl, u32 limit) {
 
   u32 min_value, max_value;
@@ -1802,11 +1797,7 @@ inline u32 choose_block_len(afl_state_t *afl, u32 limit) {
   return min_value + rand_below(afl, MIN(max_value, limit) - min_value + 1);
 
 }
-#endif /* AFL_MUTATIONS_ARRAYS_DEFINED */
 
-/* Provide non-inline definitions for functions that may not be inlined */
-/* These are only defined when arrays are defined (i.e., in afl-fuzz-one.c) */
-#ifndef AFL_MUTATIONS_ARRAYS_DEFINED
 inline u32 afl_mutate(afl_state_t *afl, u8 *buf, u32 len, u32 steps,
                       bool is_text, bool is_exploration, u8 *splice_buf,
                       u32 splice_len, u32 max_len) {
@@ -2742,7 +2733,6 @@ inline u32 afl_mutate(afl_state_t *afl, u8 *buf, u32 len, u32 steps,
   return len;
 
 }
-#endif /* AFL_MUTATIONS_ARRAYS_DEFINED */
 
 #endif                                                  /* !AFL_MUTATIONS_H */
 

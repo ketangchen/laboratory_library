@@ -32,7 +32,7 @@ VERSION     = $(shell grep '^$(HASH)define VERSION ' ../config.h | cut -d '"' -f
 
 PROGS       = afl-fuzz afl-showmap afl-tmin afl-gotcpu afl-analyze
 SH_PROGS    = afl-plot afl-cmin afl-cmin.bash afl-cmin.py afl-whatsup afl-addseeds afl-system-config afl-persistent-config afl-cc
-HEADERS     = include/afl-fuzz.h include/afl-mutations.h include/afl-lattice-mab.h include/afl-persistent-replay.h include/afl-prealloc.h include/afl-record-compat.h include/alloc-inl.h include/android-ashmem.h include/cmplog.h include/common.h include/config.h include/coverage-32.h include/coverage-64.h include/debug.h include/envs.h include/forkserver.h include/hash.h include/list.h include/sharedmem.h include/snapshot-inl.h include/t1ha.h include/t1ha0_ia32aes_b.h include/t1ha_bits.h include/t1ha_selfcheck.h include/types.h include/xxhash.h include/afl-ijon-min.h
+HEADERS     = include/afl-fuzz.h include/afl-mutations.h include/afl-persistent-replay.h include/afl-prealloc.h include/afl-record-compat.h include/alloc-inl.h include/android-ashmem.h include/cmplog.h include/common.h include/config.h include/coverage-32.h include/coverage-64.h include/debug.h include/envs.h include/forkserver.h include/hash.h include/list.h include/sharedmem.h include/snapshot-inl.h include/t1ha.h include/t1ha0_ia32aes_b.h include/t1ha_bits.h include/t1ha_selfcheck.h include/types.h include/xxhash.h include/afl-ijon-min.h
 MANPAGES=$(foreach p, $(PROGS) $(SH_PROGS), $(p).8)
 ASAN_OPTIONS=detect_leaks=0
 
@@ -284,42 +284,15 @@ COMM_HDR    = include/alloc-inl.h include/config.h include/debug.h include/types
 
 ifeq "$(shell echo '$(HASH)include <Python.h>@int main() {return 0; }' | tr @ '\n' | $(CC) $(CFLAGS) -x c - -o .test $(PYTHON_INCLUDE) $(LDFLAGS) $(PYTHON_LIB) 2>/dev/null && echo 1 || echo 0 ; rm -f .test )" "1"
 	PYTHON_OK=1
-	# Extract Python library path for rpath and LD_LIBRARY_PATH
-	# Try multiple methods to find Python library directory
-	PYTHON_LIBDIR := $(shell python3 -c "import sysconfig; print(sysconfig.get_config_var('LIBDIR') or sysconfig.get_path('stdlib').replace('/lib/python' + sysconfig.get_python_version(), '').replace('/lib', '') + '/lib')" 2>/dev/null)
-	ifeq "$(PYTHON_LIBDIR)" ""
-		PYTHON_LIBDIR := $(shell python3-config --prefix 2>/dev/null)/lib
-	endif
-	ifeq "$(PYTHON_LIBDIR)" ""
-		PYTHON_LIBDIR := $(shell echo '$(PYTHON_LIB)' | sed -n 's/.*-L\([^ ]*\).*/\1/p' | head -1)
-	endif
-	# Add rpath for Python library if not in standard system paths
-	ifeq "$(PYTHON_LIBDIR)" ""
-		PYTHON_RPATH :=
-		PYTHON_LD_LIBRARY_PATH :=
-	else
-		ifneq "$(findstring /usr/lib,$(PYTHON_LIBDIR))" "/usr/lib"
-			ifneq "$(findstring /lib,$(PYTHON_LIBDIR))" "/lib"
-				PYTHON_RPATH := -Wl,-rpath,$(PYTHON_LIBDIR)
-			else
-				PYTHON_RPATH :=
-			endif
-		else
-			PYTHON_RPATH :=
-		endif
-		PYTHON_LD_LIBRARY_PATH := $(PYTHON_LIBDIR)
-	endif
-	PYFLAGS=-DUSE_PYTHON $(PYTHON_INCLUDE) $(LDFLAGS) $(PYTHON_RPATH) $(PYTHON_LIB) -DPYTHON_VERSION="\"$(PYTHON_VERSION)\""
+	PYFLAGS=-DUSE_PYTHON $(PYTHON_INCLUDE) $(LDFLAGS) $(PYTHON_LIB) -DPYTHON_VERSION="\"$(PYTHON_VERSION)\""
 else
 	PYTHON_OK=0
 	PYFLAGS=
-	PYTHON_LD_LIBRARY_PATH :=
 endif
 
 ifdef NO_PYTHON
 	PYTHON_OK=0
 	PYFLAGS=
-	PYTHON_LD_LIBRARY_PATH :=
 endif
 
 IN_REPO=0
@@ -501,17 +474,8 @@ test_python:
 endif
 
 .PHONY: ready
-ready: fix_clock_skew
+ready:
 	@echo "[+] Everything seems to be working, ready to compile. ($(shell $(CC) --version 2>&1|head -n 1))"
-
-.PHONY: fix_clock_skew
-fix_clock_skew:
-	@# Fix clock skew by touching files that have future timestamps
-	@find . -type f -name "*.c" -o -name "*.h" -o -name "*.o" 2>/dev/null | while read f; do \
-		if [ -f "$$f" ]; then \
-			touch "$$f" 2>/dev/null || true; \
-		fi; \
-	done || true
 
 src/afl-performance.o: $(COMM_HDR) src/afl-performance.c
 	$(CC) $(CFLAGS) $(CFLAGS_FLTO) $(CFLAGS_OPT) $(SPECIAL_PERFORMANCE) -Iinclude -c src/afl-performance.c -o src/afl-performance.o
@@ -656,14 +620,8 @@ ifndef AFL_NO_X86
 test_build: afl-cc afl-showmap
 	@echo "[*] Testing the CC wrapper afl-cc and its instrumentation output..."
 	@unset AFL_MAP_SIZE AFL_USE_UBSAN AFL_USE_CFISAN AFL_USE_LSAN AFL_USE_ASAN AFL_USE_MSAN AFL_LLVM_ALLOWLIST AFL_LLVM_DENYLIST; ASAN_OPTIONS=detect_leaks=0 AFL_INST_RATIO=100 AFL_PATH=. ./afl-cc test-instr.c $(LDFLAGS) -o test-instr 2>&1 || (echo "Oops, afl-cc failed"; exit 1 )
-	@if [ -n "$(PYTHON_LD_LIBRARY_PATH)" ]; then \
-		export LD_LIBRARY_PATH="$(PYTHON_LD_LIBRARY_PATH):$${LD_LIBRARY_PATH}"; \
-	fi; \
-	ASAN_OPTIONS=detect_leaks=0 ./afl-showmap -q -m none -o .test-instr0 ./test-instr < /dev/null || true
-	@if [ -n "$(PYTHON_LD_LIBRARY_PATH)" ]; then \
-		export LD_LIBRARY_PATH="$(PYTHON_LD_LIBRARY_PATH):$${LD_LIBRARY_PATH}"; \
-	fi; \
-	echo 1 | ASAN_OPTIONS=detect_leaks=0 ./afl-showmap -m none -q -o .test-instr1 ./test-instr || true
+	-ASAN_OPTIONS=detect_leaks=0 ./afl-showmap -q -m none -o .test-instr0 ./test-instr < /dev/null
+	-echo 1 | ASAN_OPTIONS=detect_leaks=0 ./afl-showmap -m none -q -o .test-instr1 ./test-instr
 	@rm -f test-instr
 	@cmp -s .test-instr0 .test-instr1; DR="$$?"; rm -f .test-instr0 .test-instr1; if [ "$$DR" = "0" ]; then echo; echo "Oops, the instrumentation of afl-cc does not seem to be behaving correctly!"; echo; echo "Please post to https://github.com/AFLplusplus/AFLplusplus/issues to troubleshoot the issue."; echo; exit 1; fi
 	@echo

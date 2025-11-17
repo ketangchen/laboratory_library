@@ -25,7 +25,6 @@
  */
 
 #include "afl-fuzz.h"
-#include "afl-lattice-mab.h"
 #include "envs.h"
 #include <limits.h>
 
@@ -1238,22 +1237,6 @@ void show_stats_normal(afl_state_t *afl) {
 
   SAYF(bVR bH cCYA bSTOP " fuzzing strategy yields " bSTG bH10 bH2 bHT bH10 bH2
            bH bHB bH bSTOP cCYA " item geometry " bSTG bH5 bH2 bVL "\n");
-  
-  /* Display Lattice-MAB statistics if enabled */
-  if (afl->lattice_mab && (afl->lattice_mab->use_lattice || afl->lattice_mab->use_mab)) {
-    lattice_mab_state_t *lm = afl->lattice_mab;
-    u32 total_pulls;
-    double avg_reward;
-    u32 best_arm;
-    mab_get_stats(&lm->mab, &total_pulls, &avg_reward, &best_arm);
-    
-    SAYF(bV bSTOP " lattice-mab  : " cCYA "MAB:%llu Lattice:%llu Hybrid:%llu " 
-         cRST "avg_reward:%.2f best:%u" bSTG bV "\n",
-         (unsigned long long)lm->mab_selections,
-         (unsigned long long)lm->lattice_selections,
-         (unsigned long long)lm->hybrid_selections,
-         lm->avg_reward, best_arm);
-  }
 
   if (unlikely(afl->custom_only)) {
 
