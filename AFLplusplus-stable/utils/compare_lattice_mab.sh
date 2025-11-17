@@ -118,6 +118,9 @@ if [[ ! -d "$INPUT_DIR" ]]; then
 fi
 
 # 查找 afl-fuzz
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+AFL_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
 AFL_FUZZ=""
 if command -v afl-fuzz &> /dev/null; then
     # 如果在 PATH 中找到
@@ -128,20 +131,33 @@ elif [[ -f "./afl-fuzz" ]]; then
 elif [[ -f "../afl-fuzz" ]]; then
     # 如果在上一级目录找到（从 utils/ 目录运行）
     AFL_FUZZ="../afl-fuzz"
+elif [[ -f "$AFL_ROOT/afl-fuzz" ]]; then
+    # 从脚本位置查找
+    AFL_FUZZ="$AFL_ROOT/afl-fuzz"
 else
-    # 尝试从脚本位置查找
-    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    AFL_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-    if [[ -f "$AFL_ROOT/afl-fuzz" ]]; then
-        AFL_FUZZ="$AFL_ROOT/afl-fuzz"
-    else
-        echo -e "${RED}错误: 找不到 afl-fuzz 命令，请先编译 AFL++${NC}"
-        echo "请确保在 AFL++ 根目录运行此脚本，或确保 afl-fuzz 在 PATH 中"
-        exit 1
-    fi
+    echo -e "${RED}错误: 找不到 afl-fuzz 命令，请先编译 AFL++${NC}"
+    echo "请确保在 AFL++ 根目录运行此脚本，或确保 afl-fuzz 在 PATH 中"
+    exit 1
 fi
 
-echo -e "${GREEN}使用 afl-fuzz: $AFL_FUZZ${NC}"
+# 检查是否有包装脚本（用于处理 Python 库路径问题）
+if [[ -f "$AFL_ROOT/run_afl_fuzz.sh" ]]; then
+    AFL_FUZZ="$AFL_ROOT/run_afl_fuzz.sh"
+    echo -e "${GREEN}使用 afl-fuzz 包装脚本: $AFL_FUZZ${NC}"
+    echo -e "${BLUE}（自动处理 Python 库路径问题）${NC}"
+else
+    echo -e "${GREEN}使用 afl-fuzz: $AFL_FUZZ${NC}"
+    # 尝试自动设置 Python 库路径（macOS）
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        if command -v python3.13-config &> /dev/null; then
+            PYTHON_LIBDIR=$(python3.13-config --prefix 2>/dev/null)/lib
+            if [[ -d "$PYTHON_LIBDIR" ]]; then
+                export DYLD_LIBRARY_PATH="$PYTHON_LIBDIR:${DYLD_LIBRARY_PATH:-}"
+                echo -e "${BLUE}已自动设置 DYLD_LIBRARY_PATH 为: $PYTHON_LIBDIR${NC}"
+            fi
+        fi
+    fi
+fi
 
 echo -e "${BLUE}========================================${NC}"
 echo -e "${BLUE}AFL++ Lattice-MAB 对比测试${NC}"

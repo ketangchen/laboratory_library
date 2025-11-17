@@ -31,7 +31,27 @@ detect_python_lib() {
         return
     fi
     
-    # 方法4: 常见路径
+    # 方法4: macOS Homebrew Python 3.13
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # 尝试 python3.13-config
+        if command -v python3.13-config &> /dev/null; then
+            libdir=$(python3.13-config --prefix 2>/dev/null)/lib
+            if [ -d "$libdir" ] && ([ -f "$libdir/libpython"*.so* ] 2>/dev/null || [ -f "$libdir/libpython"*.dylib* ] 2>/dev/null); then
+                echo "$libdir"
+                return
+            fi
+        fi
+        # Homebrew Python 3.13 常见路径
+        for path in "/opt/homebrew/opt/python@3.13/Frameworks/Python.framework/Versions/3.13/lib" \
+                    "/opt/homebrew/Cellar/python@3.13"/*/Frameworks/Python.framework/Versions/3.13/lib; do
+            if [ -d "$path" ] && ([ -f "$path/libpython"*.so* ] 2>/dev/null || [ -f "$path/libpython"*.dylib* ] 2>/dev/null); then
+                echo "$path"
+                return
+            fi
+        done
+    fi
+    
+    # 方法5: 其他常见路径
     for path in "/usr/lib" "/usr/local/lib" "$HOME/miniconda3/lib" "$HOME/anaconda3/lib"; do
         if [ -d "$path" ] && ([ -f "$path/libpython"*.so* ] 2>/dev/null || [ -f "$path/libpython"*.dylib* ] 2>/dev/null); then
             echo "$path"
