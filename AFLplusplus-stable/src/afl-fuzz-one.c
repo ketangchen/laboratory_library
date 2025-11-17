@@ -2226,7 +2226,7 @@ havoc_stage:
   for (afl->stage_cur = 0; afl->stage_cur < afl->stage_max; ++afl->stage_cur) {
 
     u32 use_stacking = 1 + rand_below(afl, stack_max);
-    u32 r, item;  /* Declare r and item at loop level for use after retry_havoc_step */
+    u32 r = 0, item = 0;  /* Declare r and item at loop level for use after retry_havoc_step, initialize to avoid warning */
 
     afl->stage_cur_val = use_stacking;
 
