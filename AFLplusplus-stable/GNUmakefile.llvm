@@ -569,8 +569,16 @@ else
 ifdef IS_IOS
 	@ldid -Sentitlements.plist test-instr && echo "[+] Signed test-instr" || echo "[-] Failed to sign test-instr"
 endif
-	ASAN_OPTIONS=detect_leaks=0 ./afl-showmap -m none -q -o .test-instr0 ./test-instr < /dev/null
-	echo 1 | ASAN_OPTIONS=detect_leaks=0 ./afl-showmap -m none -q -o .test-instr1 ./test-instr
+	@PYTHON_LIBDIR=$$(python3 -c "import sysconfig; libdir=sysconfig.get_config_var('LIBDIR'); print(libdir if libdir else sysconfig.get_path('stdlib').replace('/lib/python' + sysconfig.get_python_version(), '').replace('/lib', '') + '/lib')" 2>/dev/null) || PYTHON_LIBDIR=$$(python3-config --prefix 2>/dev/null)/lib 2>/dev/null || PYTHON_LIBDIR=""; \
+	if [ -n "$$PYTHON_LIBDIR" ] && [ -d "$$PYTHON_LIBDIR" ]; then \
+		export LD_LIBRARY_PATH="$$PYTHON_LIBDIR:$${LD_LIBRARY_PATH}"; \
+	fi; \
+	ASAN_OPTIONS=detect_leaks=0 ./afl-showmap -m none -q -o .test-instr0 ./test-instr < /dev/null || true
+	@PYTHON_LIBDIR=$$(python3 -c "import sysconfig; libdir=sysconfig.get_config_var('LIBDIR'); print(libdir if libdir else sysconfig.get_path('stdlib').replace('/lib/python' + sysconfig.get_python_version(), '').replace('/lib', '') + '/lib')" 2>/dev/null) || PYTHON_LIBDIR=$$(python3-config --prefix 2>/dev/null)/lib 2>/dev/null || PYTHON_LIBDIR=""; \
+	if [ -n "$$PYTHON_LIBDIR" ] && [ -d "$$PYTHON_LIBDIR" ]; then \
+		export LD_LIBRARY_PATH="$$PYTHON_LIBDIR:$${LD_LIBRARY_PATH}"; \
+	fi; \
+	echo 1 | ASAN_OPTIONS=detect_leaks=0 ./afl-showmap -m none -q -o .test-instr1 ./test-instr || true
 	@rm -f test-instr
 	@cmp -s .test-instr0 .test-instr1; DR="$$?"; rm -f .test-instr0 .test-instr1; if [ "$$DR" = "0" ]; then echo; echo "Oops, the instrumentation does not seem to be behaving correctly!"; echo; echo "Please post to https://github.com/AFLplusplus/AFLplusplus/issues to troubleshoot the issue."; echo; exit 1; fi
 	@echo "[+] All right, the instrumentation seems to be working!"
