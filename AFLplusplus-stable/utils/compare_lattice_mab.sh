@@ -85,11 +85,31 @@ if [[ ! -d "$INPUT_DIR" ]]; then
     exit 1
 fi
 
-# 检查 afl-fuzz 是否可用
-if ! command -v afl-fuzz &> /dev/null; then
-    echo -e "${RED}错误: 找不到 afl-fuzz 命令，请先编译 AFL++${NC}"
-    exit 1
+# 查找 afl-fuzz
+AFL_FUZZ=""
+if command -v afl-fuzz &> /dev/null; then
+    # 如果在 PATH 中找到
+    AFL_FUZZ="afl-fuzz"
+elif [[ -f "./afl-fuzz" ]]; then
+    # 如果在当前目录找到
+    AFL_FUZZ="./afl-fuzz"
+elif [[ -f "../afl-fuzz" ]]; then
+    # 如果在上一级目录找到（从 utils/ 目录运行）
+    AFL_FUZZ="../afl-fuzz"
+else
+    # 尝试从脚本位置查找
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    AFL_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+    if [[ -f "$AFL_ROOT/afl-fuzz" ]]; then
+        AFL_FUZZ="$AFL_ROOT/afl-fuzz"
+    else
+        echo -e "${RED}错误: 找不到 afl-fuzz 命令，请先编译 AFL++${NC}"
+        echo "请确保在 AFL++ 根目录运行此脚本，或确保 afl-fuzz 在 PATH 中"
+        exit 1
+    fi
 fi
+
+echo -e "${GREEN}使用 afl-fuzz: $AFL_FUZZ${NC}"
 
 echo -e "${BLUE}========================================${NC}"
 echo -e "${BLUE}AFL++ Lattice-MAB 对比测试${NC}"
@@ -173,7 +193,7 @@ run_test() {
     fi
     
     # 运行 afl-fuzz
-    timeout "$TEST_TIME" afl-fuzz -i "$INPUT_DIR" -o "$output_dir" -- "$TARGET_BINARY" @@ 2>&1 | tee "$output_dir/fuzzer.log" || true
+    timeout "$TEST_TIME" "$AFL_FUZZ" -i "$INPUT_DIR" -o "$output_dir" -- "$TARGET_BINARY" @@ 2>&1 | tee "$output_dir/fuzzer.log" || true
     
     # 提取指标
     local metrics=$(extract_metrics "$output_dir" "$run_num")

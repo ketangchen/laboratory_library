@@ -44,6 +44,19 @@ int main(int argc, char **argv) {
 
       }
 
+    } else if (argc == 1 && isatty(STDIN_FILENO)) {
+
+      // 如果没有参数且标准输入是终端，提示用户并提供使用说明
+      fprintf(stderr, "Usage: %s <input_string>\n", argv[0]);
+      fprintf(stderr, "   or: %s -f <input_file>\n", argv[0]);
+      fprintf(stderr, "   or: echo \"input\" | %s\n", argv[0]);
+      fprintf(stderr, "\nExample: %s \"1\"\n", argv[0]);
+#ifdef EXIT_AT_END
+      exit(1);
+#else
+      return 1;
+#endif
+
     }
 
     if ((cnt = read(fd, buf, sizeof(buf) - 1)) < 1) {
