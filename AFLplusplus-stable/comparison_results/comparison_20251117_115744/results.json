@@ -1,0 +1,11 @@
+{
+  "target": "./test-instr",
+  "input_dir": "./seeds",
+  "test_time": 20,
+  "num_runs": 5,
+  "timestamp": "20251117_115744",
+  "results": {
+    "with_lattice_mab": [],
+    "without_lattice_mab": []
+  }
+}

@@ -6,6 +6,38 @@
 
 set -e
 
+# macOS 兼容性：实现 timeout 功能
+timeout_cmd() {
+    local duration=$1
+    shift
+    
+    if command -v timeout &> /dev/null; then
+        # Linux 系统有 timeout 命令
+        timeout "$duration" "$@"
+    elif command -v gtimeout &> /dev/null; then
+        # macOS 安装了 coreutils
+        gtimeout "$duration" "$@"
+    else
+        # macOS 原生实现：使用后台进程和 kill
+        # 注意：这里不使用 set -e，因为我们需要处理超时
+        "$@" &
+        local pid=$!
+        (
+            sleep "$duration"
+            kill -TERM "$pid" 2>/dev/null || kill -KILL "$pid" 2>/dev/null || true
+        ) &
+        local killer=$!
+        # 等待进程结束或超时
+        if wait "$pid" 2>/dev/null; then
+            local exit_code=$?
+        else
+            local exit_code=124  # timeout 退出码
+        fi
+        kill "$killer" 2>/dev/null || true
+        return $exit_code
+    fi
+}
+
 # 颜色输出
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -184,16 +216,22 @@ run_test() {
     mkdir -p "$output_dir"
     
     echo -e "${YELLOW}运行 $config_name (第 $run_num 次)...${NC}"
+    echo "  输出目录: $output_dir"
+    echo "  运行时间: ${TEST_TIME}秒"
     
     # 设置环境变量
     if [[ "$disable_lm" == "1" ]]; then
         export AFL_DISABLE_LATTICE_MAB=1
+        echo "  配置: 禁用 Lattice-MAB"
     else
         unset AFL_DISABLE_LATTICE_MAB
+        echo "  配置: 启用 Lattice-MAB"
     fi
     
-    # 运行 afl-fuzz
-    timeout "$TEST_TIME" "$AFL_FUZZ" -i "$INPUT_DIR" -o "$output_dir" -- "$TARGET_BINARY" @@ 2>&1 | tee "$output_dir/fuzzer.log" || true
+    # 运行 afl-fuzz（使用兼容的 timeout 函数）
+    echo "  开始运行 afl-fuzz..."
+    timeout_cmd "$TEST_TIME" "$AFL_FUZZ" -i "$INPUT_DIR" -o "$output_dir" -- "$TARGET_BINARY" @@ 2>&1 | tee "$output_dir/fuzzer.log" || true
+    echo -e "${GREEN}  完成${NC}"
     
     # 提取指标
     local metrics=$(extract_metrics "$output_dir" "$run_num")
